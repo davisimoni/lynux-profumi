@@ -39,4 +39,8 @@ export interface Product {
   accent: string;
   accentSoft: string;
   stockUnits: number;
+  /** 1-5 scale, curated brand rating shown on cards and PDP — how far the scent projects. */
+  sillage: number;
+  /** 1-5 scale, curated brand rating shown on cards and PDP — how long it lasts on skin. */
+  longevity: number;
 }

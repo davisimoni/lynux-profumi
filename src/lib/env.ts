@@ -31,3 +31,11 @@ export const orderHmacSecret = process.env.ORDER_HMAC_SECRET ?? "lynux-portfolio
  */
 export const adminAccessCode = process.env.ADMIN_ACCESS_CODE ?? "";
 export const isAdminGateConfigured = Boolean(adminAccessCode);
+
+/**
+ * Concierge chat widget. Without a key it still fully works via the local
+ * FAQ/catalogue responder in `lib/assistant/local-responder.ts` — the same
+ * Fallback Mode pattern as every other integration in this app.
+ */
+export const anthropicApiKey = process.env.ANTHROPIC_API_KEY ?? "";
+export const isAnthropicConfigured = Boolean(anthropicApiKey);

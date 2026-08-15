@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Check, Loader2, ShoppingBag, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
 import { ProductArt, type ProductArtVariant } from "@/components/product/ProductArt";
 import { OlfactoryPyramid } from "@/components/product/OlfactoryPyramid";
+import { ScentMeter } from "@/components/product/ScentMeter";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
@@ -30,7 +32,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState<"idle" | "adding" | "added">("idle");
+  const [showStickyBar, setShowStickyBar] = useState(false);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const buySectionRef = useRef<HTMLDivElement>(null);
 
   const selectedSize = product.sizes[selectedSizeIndex] ?? product.sizes[0];
 
@@ -39,6 +43,18 @@ export function ProductDetail({ product }: ProductDetailProps) {
     return () => {
       pending.forEach(clearTimeout);
     };
+  }, []);
+
+  useEffect(() => {
+    const target = buySectionRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
   }, []);
 
   function handleAddToCart(event: MouseEvent<HTMLButtonElement>) {
@@ -115,6 +131,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
             {product.description}
           </p>
 
+          <div className="mt-5 space-y-2 rounded-sm border border-border p-4">
+            <ScentMeter label="Scia" value={product.sillage} />
+            <ScentMeter label="Durata" value={product.longevity} />
+          </div>
+
           <div className="mt-8">
             <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Formato</p>
             <div className="grid grid-cols-3 gap-3">
@@ -144,7 +165,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div ref={buySectionRef} className="mt-8 flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3 rounded-sm border border-border px-3 py-2.5">
               <button
                 type="button"
@@ -205,6 +226,49 @@ export function ProductDetail({ product }: ProductDetailProps) {
       <div className="mt-16">
         <OlfactoryPyramid notes={product.notes} />
       </div>
+
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="glass-panel fixed inset-x-0 bottom-0 z-30 border-t"
+          >
+            <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+              <div className="hidden h-12 w-10 shrink-0 overflow-hidden rounded-sm bg-obsidian sm:block">
+                <ProductArt accent={product.accent} accentSoft={product.accentSoft} variant="bottle" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-display text-sm text-cream sm:text-base">
+                  {product.name}
+                </p>
+                <p className="text-xs text-muted-foreground">{selectedSize.label}</p>
+              </div>
+              <span className="font-display text-base text-gold sm:text-lg">
+                {money(selectedSize.price * quantity)}
+              </span>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={status !== "idle"}
+                className="flex shrink-0 items-center gap-2 rounded-sm bg-gold px-4 py-2.5 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 disabled:opacity-70 cursor-pointer sm:px-6"
+              >
+                {status === "idle" && (
+                  <>
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Aggiungi al Carrello</span>
+                    <span className="sm:hidden">Aggiungi</span>
+                  </>
+                )}
+                {status === "adding" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {status === "added" && <Check className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -65,6 +65,14 @@ export const useCartStore = create<CartState>()(
       closeCart: () => set({ isOpen: false }),
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
     }),
-    { name: "lynux-cart" },
+    {
+      name: "lynux-cart",
+      // Only the cart contents should survive a reload — `isOpen` is
+      // transient UI state. Without this, persisting `isOpen: true` (set
+      // the moment an item is added) means the drawer snaps back open on
+      // every subsequent full page load, blocking clicks on whatever page
+      // the customer navigated to. Caught by the checkout.spec.ts E2E test.
+      partialize: (state) => ({ items: state.items }),
+    },
   ),
 );

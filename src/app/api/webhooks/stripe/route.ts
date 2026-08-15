@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripeClient } from "@/lib/stripe/client";
 import { isStripeWebhookConfigured, stripeWebhookSecret } from "@/lib/env";
 import { getOrdersRepository } from "@/lib/orders/repository";
+import { telemetry } from "@/lib/telemetry";
 
 function extractOrderNumber(event: Stripe.Event): string | null {
   switch (event.type) {
@@ -39,9 +40,17 @@ export async function POST(request: Request) {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(payload, signature, stripeWebhookSecret);
-  } catch {
+  } catch (error) {
+    telemetry.error("stripe.webhook_invalid_signature", "Firma webhook Stripe non valida", {
+      message: error instanceof Error ? error.message : "unknown",
+    });
     return NextResponse.json({ error: "invalid_signature" }, { status: 400 });
   }
+
+  telemetry.info("stripe.webhook_received", `Evento Stripe ricevuto: ${event.type}`, {
+    eventId: event.id,
+    eventType: event.type,
+  });
 
   const orderNumber = extractOrderNumber(event);
   if (orderNumber) {
@@ -51,6 +60,10 @@ export async function POST(request: Request) {
     // that a previous delivery already confirmed.
     if (order && order.status === "received") {
       await repository.updateStatus(orderNumber, "preparing");
+      telemetry.info("stripe.webhook_order_advanced", `Ordine ${orderNumber} confermato via webhook`, {
+        orderNumber,
+        eventType: event.type,
+      });
     }
   }
 

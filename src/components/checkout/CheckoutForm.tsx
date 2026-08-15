@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CreditCard, Wallet, Loader2, ShieldCheck } from "lucide-react";
+import { CreditCard, Wallet, Loader2, ShieldCheck, TimerReset, TriangleAlert } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { StripePaymentSection, type StripeApi } from "@/components/checkout/StripePaymentSection";
@@ -14,6 +14,14 @@ import { useOrderStore, type PaymentMethod, type ShippingAddress } from "@/store
 import { useCurrencyStore } from "@/store/currency";
 import { useHasMounted } from "@/hooks/use-has-mounted";
 import { useMoney } from "@/hooks/use-money";
+import { useStockReservation } from "@/hooks/use-stock-reservation";
+import { telemetry } from "@/lib/telemetry";
+
+function formatCountdown(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
 const EMPTY_ADDRESS: ShippingAddress = {
   firstName: "",
@@ -45,6 +53,7 @@ export function CheckoutForm() {
   const setLastOrder = useOrderStore((state) => state.setLastOrder);
   const currency = useCurrencyStore((state) => state.currency);
   const money = useMoney();
+  const reservation = useStockReservation(items);
 
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
@@ -122,6 +131,13 @@ export function CheckoutForm() {
       paymentMethod,
       currency,
     });
+    reservation.release();
+    telemetry.info("checkout.order_confirmed", "Ordine confermato dal cliente", {
+      orderNumber,
+      total: finalTotal,
+      currency,
+      paymentMethod,
+    });
     clearCart();
     router.push("/checkout/success");
   }
@@ -135,6 +151,12 @@ export function CheckoutForm() {
     const form = event.currentTarget;
     if (!form.checkValidity()) {
       form.reportValidity();
+      return;
+    }
+
+    if (reservation.expired) {
+      toast.error("La tua prenotazione di magazzino è scaduta. Aggiorna la pagina per riprovare.");
+      telemetry.warn("checkout.submit_blocked_expired_reservation", "Submit bloccato: prenotazione scaduta");
       return;
     }
 
@@ -155,10 +177,16 @@ export function CheckoutForm() {
 
         if (error) {
           toast.error(error.message ?? "Pagamento non riuscito. Controlla i dati della carta.");
+          telemetry.error("checkout.stripe_confirm_failed", error.message ?? "Pagamento non riuscito", {
+            code: error.code,
+          });
           return;
         }
         if (!paymentIntent || paymentIntent.status !== "succeeded") {
           toast.error("Il pagamento non è stato completato.");
+          telemetry.error("checkout.stripe_incomplete", "PaymentIntent non risulta succeeded", {
+            status: paymentIntent?.status,
+          });
           return;
         }
 
@@ -177,6 +205,10 @@ export function CheckoutForm() {
 
         if (!confirmResponse.ok) {
           toast.error("Pagamento riuscito, ma la registrazione dell'ordine è fallita. Contattaci.");
+          telemetry.error("checkout.confirm_persist_failed", "Pagamento riuscito ma /api/checkout/confirm ha fallito", {
+            orderNumber: checkoutSession.orderNumber,
+            status: confirmResponse.status,
+          });
           return;
         }
 
@@ -193,13 +225,17 @@ export function CheckoutForm() {
 
       if (!response.ok) {
         toast.error("Non è stato possibile completare l'ordine. Riprova.");
+        telemetry.error("checkout.demo_order_failed", "/api/checkout ha risposto con errore", {
+          status: response.status,
+        });
         return;
       }
 
       const data = await response.json();
       finalizeOrder(data.orderNumber, data.subtotal, data.shipping, data.total);
-    } catch {
+    } catch (error) {
       toast.error("Errore di rete. Controlla la connessione e riprova.");
+      telemetry.error("checkout.network_error", error instanceof Error ? error.message : "Errore sconosciuto");
     } finally {
       setSubmitting(false);
     }
@@ -226,7 +262,11 @@ export function CheckoutForm() {
     );
   }
 
-  const canSubmit = !submitting && (!useRealStripe || (checkoutSession?.mode === "stripe" && !sessionLoading));
+  const canSubmit =
+    !submitting &&
+    !reservation.expired &&
+    (!useRealStripe || (checkoutSession?.mode === "stripe" && !sessionLoading));
+  const reservationLow = reservation.remainingSeconds > 0 && reservation.remainingSeconds <= 60;
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -481,6 +521,35 @@ export function CheckoutForm() {
             <span className="font-display text-lg text-cream">Totale</span>
             <span className="font-display text-2xl text-gold">{money(total)}</span>
           </div>
+
+          {reservation.insufficientStock && (
+            <div className="mt-4 flex items-center gap-2 rounded-sm border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
+              <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
+              Disponibilità insufficiente per un articolo nel carrello (rimasti:{" "}
+              {reservation.insufficientStock.available}). Aggiorna il carrello per continuare.
+            </div>
+          )}
+
+          {!reservation.insufficientStock && reservation.expired && (
+            <div className="mt-4 flex items-center gap-2 rounded-sm border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
+              <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
+              La tua prenotazione di magazzino è scaduta. Aggiorna la pagina per riservare di nuovo
+              lo stock.
+            </div>
+          )}
+
+          {!reservation.insufficientStock && !reservation.expired && reservation.reservationId && (
+            <div
+              className={`mt-4 flex items-center justify-center gap-2 rounded-sm border px-3.5 py-2.5 text-xs uppercase tracking-wide ${
+                reservationLow
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-gold/30 bg-gold/5 text-gold"
+              }`}
+            >
+              <TimerReset className="h-3.5 w-3.5" />
+              Riservato per te: {formatCountdown(reservation.remainingSeconds)}
+            </div>
+          )}
 
           <button
             type="submit"

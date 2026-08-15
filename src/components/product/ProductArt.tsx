@@ -74,7 +74,7 @@ export function ProductArt({
         </filter>
       </defs>
 
-      <rect width="400" height="500" fill="#0a0a0c" />
+      <rect width="400" height="500" fill="var(--obsidian)" />
 
       {variant === "bottle" && (
         <g>

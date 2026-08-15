@@ -1,5 +1,6 @@
 import { products } from "@/data/products";
 import type { PersistedOrder } from "@/lib/orders/types";
+import { unitsSoldByProduct } from "@/lib/orders/metrics";
 
 export interface InventoryRow {
   productId: string;
@@ -21,19 +22,10 @@ const LOW_STOCK_THRESHOLD = 20;
 
 export function computeAdminMetrics(orders: PersistedOrder[]): AdminMetrics {
   const totalRevenueEur = orders.reduce((sum, order) => sum + order.total, 0);
-
-  const unitsSoldByProduct = new Map<string, number>();
-  for (const order of orders) {
-    for (const item of order.items) {
-      unitsSoldByProduct.set(
-        item.productId,
-        (unitsSoldByProduct.get(item.productId) ?? 0) + item.quantity,
-      );
-    }
-  }
+  const soldByProduct = unitsSoldByProduct(orders);
 
   const inventory: InventoryRow[] = products.map((product) => {
-    const unitsSold = unitsSoldByProduct.get(product.id) ?? 0;
+    const unitsSold = soldByProduct.get(product.id) ?? 0;
     const remaining = Math.max(0, product.stockUnits - unitsSold);
     return {
       productId: product.id,

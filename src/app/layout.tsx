@@ -1,20 +1,26 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { FlyToCartLayer } from "@/components/cart/FlyToCartLayer";
 import { CommandPalette } from "@/components/command/CommandPalette";
+import { QuickViewModal } from "@/components/product/QuickViewModal";
+import { ErrorBoundary } from "@/components/system/ErrorBoundary";
+import { ChatWidget } from "@/components/assistant/ChatWidget";
 import { Toaster } from "@/components/ui/sonner";
+import { isAnthropicConfigured } from "@/lib/env";
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
-const jost = Jost({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -51,16 +57,29 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="it"
-      className={`${cormorant.variable} ${jost.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${playfair.variable} ${jakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-obsidian bg-noise">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <FlyToCartLayer />
-        <CommandPalette />
-        <Toaster theme="dark" position="bottom-right" />
+        <ThemeProvider
+          attribute="data-mode"
+          defaultTheme="nuit"
+          themes={["nuit", "jour"]}
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <Header />
+          <main className="flex-1">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
+          <Footer />
+          <CartDrawer />
+          <FlyToCartLayer />
+          <CommandPalette />
+          <QuickViewModal />
+          <ChatWidget aiEnabled={isAnthropicConfigured} />
+          <Toaster position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

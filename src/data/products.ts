@@ -39,6 +39,8 @@ export const products: Product[] = [
     accent: "#D4AF37",
     accentSoft: "#5A2A2A",
     stockUnits: 42,
+    sillage: 5,
+    longevity: 5,
   },
   {
     id: "2",
@@ -63,6 +65,8 @@ export const products: Product[] = [
     accent: "#C5793B",
     accentSoft: "#3A2412",
     stockUnits: 76,
+    sillage: 3,
+    longevity: 4,
   },
   {
     id: "3",
@@ -87,6 +91,8 @@ export const products: Product[] = [
     accent: "#C9A66B",
     accentSoft: "#4A3B2A",
     stockUnits: 18,
+    sillage: 2,
+    longevity: 5,
   },
   {
     id: "4",
@@ -111,6 +117,8 @@ export const products: Product[] = [
     accent: "#B7C36B",
     accentSoft: "#2E3A22",
     stockUnits: 95,
+    sillage: 3,
+    longevity: 2,
   },
   {
     id: "5",
@@ -135,6 +143,8 @@ export const products: Product[] = [
     accent: "#C97B8C",
     accentSoft: "#4A1F2B",
     stockUnits: 33,
+    sillage: 4,
+    longevity: 4,
   },
   {
     id: "6",
@@ -159,6 +169,8 @@ export const products: Product[] = [
     accent: "#C0763F",
     accentSoft: "#33352A",
     stockUnits: 61,
+    sillage: 2,
+    longevity: 3,
   },
 ];
 

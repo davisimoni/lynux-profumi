@@ -5,10 +5,14 @@ import { isStripeConfigured } from "@/lib/env";
 import { generateSignedOrderNumber } from "@/lib/order-security";
 import { getOrdersRepository } from "@/lib/orders/repository";
 import { convertFromEur } from "@/lib/currency";
+import { telemetry } from "@/lib/telemetry";
 
 export async function POST(request: Request) {
   const parsed = checkoutCreateSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
+    telemetry.warn("checkout.invalid_request", "Payload di checkout non valido", {
+      issues: parsed.error?.issues,
+    });
     return NextResponse.json(
       { error: "invalid_request", issues: parsed.error.issues },
       { status: 400 },
@@ -19,7 +23,14 @@ export async function POST(request: Request) {
   const trustedCart = buildTrustedCart(items);
 
   if (trustedCart.items.length === 0) {
+    telemetry.warn("checkout.empty_cart", "Tentativo di checkout con carrello vuoto");
     return NextResponse.json({ error: "empty_cart" }, { status: 400 });
+  }
+
+  if (trustedCart.issues.length > 0) {
+    telemetry.warn("checkout.price_integrity_mismatch", "Prezzo client discordante dal catalogo", {
+      issues: trustedCart.issues,
+    });
   }
 
   const orderNumber = generateSignedOrderNumber();
@@ -50,6 +61,13 @@ export async function POST(request: Request) {
       stripePaymentIntentId: null,
       createdAt: now,
       updatedAt: now,
+    });
+
+    telemetry.info("checkout.demo_order_created", `Ordine demo ${orderNumber} creato`, {
+      orderNumber,
+      total: trustedCart.total,
+      currency,
+      itemCount: trustedCart.items.length,
     });
 
     return NextResponse.json({
@@ -83,6 +101,13 @@ export async function POST(request: Request) {
   // the admin revenue dashboard) with abandoned-cart noise. The order is
   // only saved by /api/checkout/confirm once Stripe confirms the payment
   // actually succeeded, with the webhook as a second, idempotent backstop.
+
+  telemetry.info("checkout.stripe_intent_created", `PaymentIntent creato per l'ordine ${orderNumber}`, {
+    orderNumber,
+    paymentIntentId: paymentIntent.id,
+    amountInMinorUnits,
+    currency,
+  });
 
   return NextResponse.json({
     mode: "stripe" as const,

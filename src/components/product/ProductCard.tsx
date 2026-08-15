@@ -3,13 +3,15 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { motion } from "framer-motion";
-import { ShoppingBag } from "lucide-react";
+import { Eye, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
 import { ProductArt } from "@/components/product/ProductArt";
+import { ScentMeter } from "@/components/product/ScentMeter";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
+import { useQuickViewStore } from "@/store/quick-view";
 import { useMoney } from "@/hooks/use-money";
 
 interface ProductCardProps {
@@ -19,6 +21,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const triggerFlyToCart = useFlyToCartStore((state) => state.trigger);
+  const openQuickView = useQuickViewStore((state) => state.open);
   const money = useMoney();
   const defaultSize = product.sizes[1] ?? product.sizes[0];
 
@@ -39,6 +42,11 @@ export function ProductCard({ product }: ProductCardProps) {
     toast.success(`${product.name} aggiunto al carrello`, {
       description: defaultSize.label,
     });
+  }
+
+  function handleQuickView(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    openQuickView(product);
   }
 
   return (
@@ -67,6 +75,14 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           )}
         </div>
+        <button
+          type="button"
+          onClick={handleQuickView}
+          aria-label={`Anteprima olfattiva di ${product.name}`}
+          className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-gold/30 bg-obsidian/70 text-cream opacity-100 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
       </div>
 
       <div className="space-y-3 p-4">
@@ -81,6 +97,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-xs text-muted-foreground/80">
           {product.notes.top.slice(0, 3).join(" · ")}
         </p>
+
+        <div className="space-y-1 border-t border-border pt-3">
+          <ScentMeter label="Scia" value={product.sillage} compact />
+          <ScentMeter label="Durata" value={product.longevity} compact />
+        </div>
 
         <div className="flex items-center justify-between pt-1">
           <span className="font-display text-lg text-gold">

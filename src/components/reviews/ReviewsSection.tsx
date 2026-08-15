@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { MessageSquarePlus, PenLine } from "lucide-react";
 import { StarRating } from "@/components/reviews/StarRating";
-import { ScentMeter } from "@/components/reviews/ScentMeter";
+import { ScentMeter } from "@/components/product/ScentMeter";
 import { Slider } from "@/components/ui/slider";
 import {
   aggregateReviews,
