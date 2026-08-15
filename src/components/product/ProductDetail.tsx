@@ -8,10 +8,14 @@ import type { Product } from "@/types/product";
 import { ProductArt, type ProductArtVariant } from "@/components/product/ProductArt";
 import { OlfactoryPyramid } from "@/components/product/OlfactoryPyramid";
 import { ScentMeter } from "@/components/product/ScentMeter";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
 import { useMoney } from "@/hooks/use-money";
+import { ENGRAVING_MARKER, ENGRAVING_MAX_LENGTH, ENGRAVING_PRICE } from "@/lib/checkout/pricing";
+
+const SAMPLE_SIZE_LABEL = "Sample Kit (10ml)";
 
 const GALLERY: { variant: ProductArtVariant; label: string }[] = [
   { variant: "bottle", label: "Flacone" },
@@ -33,10 +37,16 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState<"idle" | "adding" | "added">("idle");
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [engravingEnabled, setEngravingEnabled] = useState(false);
+  const [engravingText, setEngravingText] = useState("");
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const buySectionRef = useRef<HTMLDivElement>(null);
 
   const selectedSize = product.sizes[selectedSizeIndex] ?? product.sizes[0];
+  const engravingAvailable = selectedSize.label !== SAMPLE_SIZE_LABEL;
+  const trimmedEngravingText = engravingText.trim();
+  const engravingActive = engravingAvailable && engravingEnabled && trimmedEngravingText.length > 0;
+  const unitPriceWithEngraving = selectedSize.price + (engravingActive ? ENGRAVING_PRICE : 0);
 
   useEffect(() => {
     const pending = timeouts.current;
@@ -64,6 +74,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
     const rect = event.currentTarget.getBoundingClientRect();
     triggerFlyToCart({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }, product.accent);
 
+    const finalSizeLabel = engravingActive
+      ? `${selectedSize.label}${ENGRAVING_MARKER}${trimmedEngravingText.toUpperCase()}`
+      : selectedSize.label;
+
     timeouts.current.push(
       setTimeout(() => {
         addItem(
@@ -72,15 +86,15 @@ export function ProductDetail({ product }: ProductDetailProps) {
             slug: product.slug,
             name: product.name,
             family: product.family,
-            sizeLabel: selectedSize.label,
+            sizeLabel: finalSizeLabel,
             sizeMl: selectedSize.ml,
-            unitPrice: selectedSize.price,
+            unitPrice: unitPriceWithEngraving,
             accent: product.accent,
           },
           quantity,
         );
         toast.success(`${product.name} aggiunto al carrello`, {
-          description: `${selectedSize.label} · Quantità ${quantity}`,
+          description: `${finalSizeLabel} · Quantità ${quantity}`,
         });
         setStatus("added");
       }, 450),
@@ -98,7 +112,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
           <div className="aspect-square overflow-hidden rounded-md border border-border bg-obsidian">
-            <ProductArt accent={product.accent} accentSoft={product.accentSoft} variant={activeVariant} />
+            <ProductArt
+              accent={product.accent}
+              accentSoft={product.accentSoft}
+              variant={activeVariant}
+              engravingText={engravingActive ? trimmedEngravingText : undefined}
+            />
           </div>
           <div className="mt-4 grid grid-cols-4 gap-3">
             {GALLERY.map(({ variant, label }) => (
@@ -165,6 +184,42 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           </div>
 
+          {engravingAvailable && (
+            <div className="mt-6 rounded-sm border border-border p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <Checkbox
+                  checked={engravingEnabled}
+                  onCheckedChange={(checked) => setEngravingEnabled(Boolean(checked))}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="block text-sm text-cream">
+                    Incisione Personalizzata Boccetta{" "}
+                    <span className="text-gold">(+{money(ENGRAVING_PRICE)})</span>
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    Un&apos;iscrizione elegante incisa sul flacone, in anteprima dal vivo qui accanto.
+                  </span>
+                </span>
+              </label>
+
+              {engravingEnabled && (
+                <div className="mt-4">
+                  <input
+                    value={engravingText}
+                    onChange={(event) => setEngravingText(event.target.value.slice(0, ENGRAVING_MAX_LENGTH))}
+                    maxLength={ENGRAVING_MAX_LENGTH}
+                    placeholder="Il tuo nome o messaggio"
+                    className="w-full rounded-sm border border-border bg-transparent px-3.5 py-2.5 text-sm uppercase tracking-wide text-cream placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-gold"
+                  />
+                  <p className="mt-1.5 text-right text-[11px] text-muted-foreground">
+                    {engravingText.length}/{ENGRAVING_MAX_LENGTH}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div ref={buySectionRef} className="mt-8 flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3 rounded-sm border border-border px-3 py-2.5">
               <button
@@ -198,7 +253,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               {status === "idle" && (
                 <>
                   <ShoppingBag className="h-4 w-4" />
-                  Aggiungi al Carrello · {money(selectedSize.price * quantity)}
+                  Aggiungi al Carrello · {money(unitPriceWithEngraving * quantity)}
                 </>
               )}
               {status === "adding" && (
@@ -247,7 +302,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <p className="text-xs text-muted-foreground">{selectedSize.label}</p>
               </div>
               <span className="font-display text-base text-gold sm:text-lg">
-                {money(selectedSize.price * quantity)}
+                {money(unitPriceWithEngraving * quantity)}
               </span>
               <button
                 type="button"

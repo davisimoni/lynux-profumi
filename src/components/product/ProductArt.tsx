@@ -10,6 +10,8 @@ interface ProductArtProps {
   accentSoft: string;
   variant?: ProductArtVariant;
   className?: string;
+  /** Optional personalization engraved beneath the "LX" monogram (bottle variant only). */
+  engravingText?: string;
 }
 
 export function ProductArt({
@@ -17,6 +19,7 @@ export function ProductArt({
   accentSoft,
   variant = "bottle",
   className,
+  engravingText,
 }: ProductArtProps) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
 
@@ -116,7 +119,7 @@ export function ProductArt({
           <line x1="176" y1="270" x2="224" y2="270" stroke={accent} strokeOpacity="0.5" strokeWidth="1" />
           <text
             x="200"
-            y="292"
+            y={engravingText ? "286" : "292"}
             textAnchor="middle"
             fontFamily="var(--font-display), serif"
             fontSize="18"
@@ -126,6 +129,21 @@ export function ProductArt({
           >
             LX
           </text>
+          {engravingText && (
+            <text
+              x="200"
+              y="307"
+              textAnchor="middle"
+              fontFamily="var(--font-display), serif"
+              fontStyle="italic"
+              fontSize="10"
+              letterSpacing="0.5"
+              fill={accent}
+              opacity="0.75"
+            >
+              {engravingText.slice(0, 14).toUpperCase()}
+            </text>
+          )}
         </g>
       )}
 

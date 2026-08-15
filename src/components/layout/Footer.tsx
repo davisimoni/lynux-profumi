@@ -60,6 +60,9 @@ export function Footer() {
               <Link href="/custom-blend" className="transition-colors hover:text-cream">
                 Layering Lab
               </Link>
+              <Link href="/sample-discovery" className="transition-colors hover:text-cream">
+                Discovery Set
+              </Link>
               <Link href="/checkout" className="transition-colors hover:text-cream">
                 Checkout
               </Link>

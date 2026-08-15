@@ -5,6 +5,17 @@ import { cartShipping, cartSubtotal, cartVatIncluded, type CartItem } from "@/li
 const DUO_SET_SUFFIX = " · Duo Set";
 const DUO_DISCOUNT = 0.1;
 
+export const DISCOVERY_SET_SUFFIX = " · Discovery Set";
+export const DISCOVERY_SET_SAMPLE_COUNT = 5;
+export const DISCOVERY_SET_TOTAL_PRICE = 60;
+export const DISCOVERY_SET_UNIT_PRICE = Math.round(
+  DISCOVERY_SET_TOTAL_PRICE / DISCOVERY_SET_SAMPLE_COUNT,
+);
+
+export const ENGRAVING_MARKER = " · Incisione: ";
+export const ENGRAVING_PRICE = 15;
+export const ENGRAVING_MAX_LENGTH = 12;
+
 export const cartItemSchema = z.object({
   productId: z.string().min(1),
   slug: z.string().min(1),
@@ -72,18 +83,39 @@ export interface TrustedCartResult {
 /**
  * Recomputes the canonical EUR unit price for a cart line from the product
  * catalogue instead of trusting the client-supplied value — a client could
- * otherwise post an arbitrary `unitPrice` and check out for free.
+ * otherwise post an arbitrary `unitPrice` and check out for free. Handles
+ * three line "shapes", stacked as suffixes on the plain size label:
+ *  - "{size}"                                — a normal purchase
+ *  - "{size} · Duo Set"                       — 10% off, from the Layering Lab
+ *  - "{size} · Incisione: {TEXT}"             — +€15 engraving surcharge
+ *  - "{10ml} · Discovery Set"                 — flat per-sample bundle price
  */
 function resolveTrustedUnitPrice(productId: string, sizeLabel: string): number | null {
   const product = products.find((candidate) => candidate.id === productId);
   if (!product) return null;
 
-  const isDuoSet = sizeLabel.endsWith(DUO_SET_SUFFIX);
-  const baseLabel = isDuoSet ? sizeLabel.slice(0, -DUO_SET_SUFFIX.length) : sizeLabel;
+  if (sizeLabel.endsWith(DISCOVERY_SET_SUFFIX)) {
+    const baseLabel = sizeLabel.slice(0, -DISCOVERY_SET_SUFFIX.length);
+    const isValidSample = product.sizes.some((size) => size.label === baseLabel && size.ml === 10);
+    return isValidSample ? DISCOVERY_SET_UNIT_PRICE : null;
+  }
+
+  let workingLabel = sizeLabel;
+  let surcharge = 0;
+
+  const engravingIndex = workingLabel.indexOf(ENGRAVING_MARKER);
+  if (engravingIndex !== -1) {
+    workingLabel = workingLabel.slice(0, engravingIndex);
+    surcharge += ENGRAVING_PRICE;
+  }
+
+  const isDuoSet = workingLabel.endsWith(DUO_SET_SUFFIX);
+  const baseLabel = isDuoSet ? workingLabel.slice(0, -DUO_SET_SUFFIX.length) : workingLabel;
   const size = product.sizes.find((candidate) => candidate.label === baseLabel);
   if (!size) return null;
 
-  return isDuoSet ? Math.round(size.price * (1 - DUO_DISCOUNT)) : size.price;
+  const basePrice = isDuoSet ? Math.round(size.price * (1 - DUO_DISCOUNT)) : size.price;
+  return basePrice + surcharge;
 }
 
 /**

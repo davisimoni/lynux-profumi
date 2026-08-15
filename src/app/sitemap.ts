@@ -4,7 +4,13 @@ import { products } from "@/data/products";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lynux-profumi.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes: MetadataRoute.Sitemap = ["", "/catalog", "/scent-finder", "/custom-blend"].map((path) => ({
+  const staticRoutes: MetadataRoute.Sitemap = [
+    "",
+    "/catalog",
+    "/scent-finder",
+    "/custom-blend",
+    "/sample-discovery",
+  ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date(),
     changeFrequency: path === "" ? "weekly" : "monthly",

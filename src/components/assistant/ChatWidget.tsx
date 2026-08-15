@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, Sparkles, X } from "lucide-react";
+import { MessageSquare, Send, Sparkles, X } from "lucide-react";
 import { useAssistantStore, type ChatMessage } from "@/store/assistant";
 import { useHasMounted } from "@/hooks/use-has-mounted";
 
@@ -104,7 +104,7 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
                 <div>
-                  <p className="font-display text-sm text-cream">Concierge Lynux</p>
+                  <p className="font-display text-sm text-cream">Lynux Olfactive Concierge</p>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     {aiEnabled ? "Assistente AI" : "Assistente Lynux"}
                   </p>
@@ -199,7 +199,7 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
         aria-label={isOpen ? "Chiudi l'assistente" : "Apri l'assistente"}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg transition-transform hover:scale-105 cursor-pointer"
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Bot className="h-6 w-6" />}
+        {isOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-6 w-6" />}
       </button>
     </div>
   );
