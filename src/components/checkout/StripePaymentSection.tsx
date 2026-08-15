@@ -42,11 +42,11 @@ export function StripePaymentSection({ clientSecret, onReady }: StripePaymentSec
         appearance: {
           theme: "night",
           variables: {
-            colorPrimary: "#D4AF37",
-            colorBackground: "#111114",
-            colorText: "#F5F5F0",
+            colorPrimary: "#D8B45B",
+            colorBackground: "#121216",
+            colorText: "#F5F5F2",
             colorDanger: "#B3402F",
-            colorTextPlaceholder: "#A8A6A0",
+            colorTextPlaceholder: "#94A3B8",
             fontFamily: "var(--font-body), sans-serif",
             borderRadius: "2px",
             spacingUnit: "4px",

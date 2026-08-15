@@ -157,7 +157,7 @@ export function Header() {
 
               <div className="flex items-center gap-2 px-4 pb-6 text-xs text-muted-foreground">
                 <Sparkles className="h-4 w-4 text-gold" />
-                Essence of Unseen Luxury
+                L&apos;Arte della Profumeria Invisibile
               </div>
             </SheetContent>
           </Sheet>

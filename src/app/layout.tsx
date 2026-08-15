@@ -27,7 +27,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lynux-profumi.vercel.app";
-const SITE_TITLE = "Lynux Profumi — Essence of Unseen Luxury";
+const SITE_TITLE = "Lynux Profumi — L'Arte della Profumeria Invisibile";
 const SITE_DESCRIPTION =
   "Profumeria di nicchia. Fragranze rare in Extrait de Parfum ed Eau de Parfum, composte con materie prime pregiate. Scopri la tua essenza su Lynux Profumi.";
 

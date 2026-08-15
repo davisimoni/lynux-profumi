@@ -50,8 +50,8 @@ export function ProductArt({
           <stop offset="100%" stopColor="#050506" stopOpacity="0.92" />
         </linearGradient>
         <linearGradient id={capId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#f2d786" />
-          <stop offset="100%" stopColor="#a9793a" />
+          <stop offset="0%" stopColor="#f0dba3" />
+          <stop offset="100%" stopColor="#a67c37" />
         </linearGradient>
         <linearGradient id={shineId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />

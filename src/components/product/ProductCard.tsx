@@ -5,7 +5,7 @@ import type { MouseEvent } from "react";
 import { motion } from "framer-motion";
 import { Eye, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import type { Product } from "@/types/product";
+import type { Concentration, Product } from "@/types/product";
 import { ProductArt } from "@/components/product/ProductArt";
 import { ScentMeter } from "@/components/product/ScentMeter";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,11 @@ import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
 import { useQuickViewStore } from "@/store/quick-view";
 import { useMoney } from "@/hooks/use-money";
+
+const CONCENTRATION_PERCENT: Record<Concentration, string> = {
+  "Extrait de Parfum": "25%",
+  "Eau de Parfum": "18%",
+};
 
 interface ProductCardProps {
   product: Product;
@@ -53,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
-      className="group relative overflow-hidden rounded-md border border-border bg-card transition-colors duration-300 hover:border-gold/50 hover:shadow-[0_20px_40px_-24px_rgba(212,175,55,0.35)]"
+      className="group relative overflow-hidden rounded-md border border-border bg-card backdrop-blur-xl transition-all duration-300 hover:border-gold/60 hover:shadow-[0_24px_48px_-24px_rgba(216,180,91,0.4)]"
     >
       <Link
         href={`/product/${product.slug}`}
@@ -62,9 +67,10 @@ export function ProductCard({ product }: ProductCardProps) {
       />
 
       <div className="relative aspect-[4/5] overflow-hidden bg-obsidian">
-        <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.06]">
+        <div className="absolute inset-0 transition-[transform,filter] duration-700 ease-out group-hover:scale-[1.08] group-hover:saturate-[0.85] group-hover:brightness-95">
           <ProductArt accent={product.accent} accentSoft={product.accentSoft} variant="bottle" />
         </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian/50 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
           {product.bestseller && (
             <Badge className="border-none bg-gold text-obsidian tracking-wide">Bestseller</Badge>
@@ -75,6 +81,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           )}
         </div>
+        <span className="absolute bottom-3 left-3 rounded-sm border border-gold/25 bg-obsidian/60 px-2.5 py-1 text-[10px] uppercase tracking-wide text-gold/90 backdrop-blur-sm">
+          {product.concentration} · {CONCENTRATION_PERCENT[product.concentration]}
+        </span>
         <button
           type="button"
           onClick={handleQuickView}
@@ -85,20 +94,20 @@ export function ProductCard({ product }: ProductCardProps) {
         </button>
       </div>
 
-      <div className="space-y-3 p-4">
-        <div className="space-y-1">
+      <div className="space-y-4 p-6">
+        <div className="space-y-1.5">
           <p className="text-[11px] uppercase tracking-luxe text-muted-foreground">
-            {product.family} · {product.concentration}
+            {product.family}
           </p>
-          <h3 className="font-display text-xl text-cream">{product.name}</h3>
-          <p className="text-sm text-muted-foreground">{product.tagline}</p>
+          <h3 className="font-display text-xl tracking-tight text-cream">{product.name}</h3>
+          <p className="text-sm leading-relaxed text-muted-foreground">{product.tagline}</p>
         </div>
 
         <p className="text-xs text-muted-foreground/80">
           {product.notes.top.slice(0, 3).join(" · ")}
         </p>
 
-        <div className="space-y-1 border-t border-border pt-3">
+        <div className="space-y-1.5 border-t border-border pt-4">
           <ScentMeter label="Scia" value={product.sillage} compact />
           <ScentMeter label="Durata" value={product.longevity} compact />
         </div>

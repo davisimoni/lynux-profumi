@@ -36,7 +36,7 @@ export const products: Product[] = [
     sizes: buildSizes("Extrait de Parfum", 245),
     bestseller: true,
     popularity: 98,
-    accent: "#D4AF37",
+    accent: "#D8B45B",
     accentSoft: "#5A2A2A",
     stockUnits: 42,
     sillage: 5,

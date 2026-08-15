@@ -18,9 +18,9 @@ export default async function OpengraphImage({ params }: OgImageProps) {
   const product = getProductBySlug(id);
 
   const name = product?.name ?? "Lynux Profumi";
-  const tagline = product?.tagline ?? "Essence of Unseen Luxury";
+  const tagline = product?.tagline ?? "L'Arte della Profumeria Invisibile";
   const family = product?.family;
-  const accent = product?.accent ?? "#D4AF37";
+  const accent = product?.accent ?? "#D8B45B";
 
   return new ImageResponse(
     (
@@ -32,8 +32,8 @@ export default async function OpengraphImage({ params }: OgImageProps) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0A0A0C",
-          backgroundImage: "linear-gradient(135deg, #0A0A0C 0%, #131316 55%, #0A0A0C 100%)",
+          backgroundColor: "#08080A",
+          backgroundImage: "linear-gradient(135deg, #08080A 0%, #121216 55%, #08080A 100%)",
           padding: "80px",
         }}
       >
@@ -69,7 +69,7 @@ export default async function OpengraphImage({ params }: OgImageProps) {
               marginTop: 36,
               fontSize: 88,
               fontWeight: 600,
-              color: "#F5F5F0",
+              color: "#F5F5F2",
               letterSpacing: 2,
             }}
           >
@@ -81,7 +81,7 @@ export default async function OpengraphImage({ params }: OgImageProps) {
               display: "flex",
               marginTop: 24,
               fontSize: 32,
-              color: "#A8A6A0",
+              color: "#94A3B8",
             }}
           >
             {tagline}

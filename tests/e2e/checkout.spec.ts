@@ -11,7 +11,7 @@ test.describe("Lynux Profumi — checkout journey", () => {
   test("add to cart, take the scent quiz, check out, then track the order", async ({ page }) => {
     // --- 1. Add to cart from the homepage bestsellers grid -----------------
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Unseen/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Invisibile/i })).toBeVisible();
 
     await page.getByRole("button", { name: "Aggiungi" }).first().click();
     await expect(page.getByText("Il tuo Carrello")).toBeVisible();
