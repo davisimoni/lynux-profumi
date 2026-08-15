@@ -25,7 +25,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2 space-y-4">
-            <span className="font-display text-2xl tracking-luxe text-cream">LYNUX</span>
+            <span className="font-display text-2xl font-semibold tracking-luxe text-cream">LYNUX</span>
             <p className="max-w-sm text-sm text-muted-foreground">
               Profumeria di nicchia per chi cerca l&apos;essenza, non l&apos;ovvio. Fragranze
               composte con materie prime rare, in edizioni discrete e senza compromessi.

@@ -98,7 +98,7 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-luxe text-gold">Area Riservata</p>
-          <h1 className="mt-2 font-display text-4xl font-light text-cream">Admin Dashboard</h1>
+          <h1 className="mt-2 font-display text-4xl font-semibold text-cream">Admin Dashboard</h1>
         </div>
         <button
           type="button"

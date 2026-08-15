@@ -15,7 +15,7 @@ export function PressStrip() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {PRESS_QUOTES.map(({ quote, source }) => (
             <figure key={source} className="text-center">
-              <blockquote className="font-display text-lg font-light italic leading-snug text-cream sm:text-xl">
+              <blockquote className="font-display text-lg font-semibold leading-snug text-cream sm:text-xl">
                 &ldquo;{quote}&rdquo;
               </blockquote>
               <figcaption className="mt-4 text-[11px] uppercase tracking-luxe text-gold">

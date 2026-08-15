@@ -53,7 +53,7 @@ export function OrderSuccess() {
           <CheckCircle2 className="h-8 w-8" />
         </div>
         <p className="mt-6 text-xs uppercase tracking-luxe text-gold">Ordine Confermato</p>
-        <h1 className="mt-2 font-display text-4xl font-light text-cream">Grazie, {order.shippingAddress.firstName}</h1>
+        <h1 className="mt-2 font-display text-4xl font-semibold text-cream">Grazie, {order.shippingAddress.firstName}</h1>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
           Il tuo ordine è stato ricevuto e sarà preparato con cura in una confezione luxury gift
           box, pronta per essere spedita.

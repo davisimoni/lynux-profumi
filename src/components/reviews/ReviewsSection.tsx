@@ -92,7 +92,7 @@ export function ReviewsSection({ productId, productName }: ReviewsSectionProps) 
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-2 text-center">
           <p className="text-xs uppercase tracking-luxe text-gold">Voci di chi ha già scoperto</p>
-          <h2 className="font-display text-3xl font-light text-cream">
+          <h2 className="font-display text-3xl font-semibold text-cream">
             Recensioni su {productName}
           </h2>
         </div>

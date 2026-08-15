@@ -272,7 +272,7 @@ export function CheckoutForm() {
     <form onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
         <p className="text-xs uppercase tracking-luxe text-gold">Checkout</p>
-        <h1 className="mt-2 font-display text-4xl font-light text-cream">Completa il tuo Ordine</h1>
+        <h1 className="mt-2 font-display text-4xl font-semibold text-cream">Completa il tuo Ordine</h1>
       </div>
 
       <div className="grid gap-12 lg:grid-cols-[1fr_400px]">

@@ -72,7 +72,7 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
       </div>
       <div>
         <p className="text-xs uppercase tracking-luxe text-gold">Area Riservata</p>
-        <h1 className="mt-2 font-display text-3xl font-light text-cream">Admin Dashboard</h1>
+        <h1 className="mt-2 font-display text-3xl font-semibold text-cream">Admin Dashboard</h1>
         <p className="mt-3 text-sm text-muted-foreground">
           {gateConfigured
             ? "Inserisci il codice di accesso per consultare fatturato, ordini e inventario."

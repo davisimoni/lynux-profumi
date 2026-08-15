@@ -34,11 +34,17 @@
   --color-obsidian: var(--obsidian);
   --color-obsidian-raised: var(--obsidian-raised);
   --color-cream: var(--cream);
+  --color-foreground-secondary: var(--foreground-secondary);
 
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
+}
+
+:root {
+  --font-display: var(--font-cinzel);
+  --font-body: var(--font-inter);
 }
 
 /* Nuit — deep opulent default atmosphere */
@@ -52,6 +58,8 @@
   --gold: #d8b45b;
   --gold-soft: #a67c37;
   --bronze: #a67c37;
+
+  --foreground-secondary: #e2e8f0;
 
   --card: rgba(18, 18, 22, 0.75);
   --card-foreground: #f5f5f2;
@@ -142,6 +150,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
+    font-weight: 600;
     letter-spacing: -0.015em;
   }
 

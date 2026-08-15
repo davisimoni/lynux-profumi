@@ -76,7 +76,7 @@ export function SampleDiscoveryClient() {
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-4 flex flex-col items-center gap-3 text-center">
         <p className="text-xs uppercase tracking-luxe text-gold">Discovery Set · 5x10ml</p>
-        <h1 className="font-display text-4xl font-light text-cream sm:text-5xl">
+        <h1 className="font-display text-4xl font-semibold text-cream sm:text-5xl">
           Componi la tua Collezione di Scoperta
         </h1>
         <p className="max-w-xl text-sm text-muted-foreground">

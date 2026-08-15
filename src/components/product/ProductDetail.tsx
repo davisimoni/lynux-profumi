@@ -141,7 +141,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <p className="text-xs uppercase tracking-luxe text-gold">
             {product.family} · {product.gender}
           </p>
-          <h1 className="mt-3 font-display text-4xl font-light text-cream sm:text-5xl">
+          <h1 className="mt-3 font-display text-4xl font-semibold text-cream sm:text-5xl">
             {product.name}
           </h1>
           <p className="mt-2 text-base text-muted-foreground">{product.tagline}</p>

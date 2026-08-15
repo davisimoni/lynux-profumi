@@ -34,7 +34,7 @@ export function NewsletterSection() {
           <Gem className="h-5 w-5" />
         </span>
         <p className="mt-6 text-xs uppercase tracking-luxe text-gold">Lynux Vault</p>
-        <h2 className="mt-2 font-display text-3xl font-light text-cream sm:text-4xl">
+        <h2 className="mt-2 font-display text-3xl font-semibold text-cream sm:text-4xl">
           Accesso Riservato al Private Club
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">

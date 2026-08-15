@@ -23,20 +23,20 @@ export function Hero() {
           Alta Profumeria di Nicchia
         </p>
         <h1
-          className="animate-fade-up mt-6 max-w-3xl text-balance font-display text-5xl font-light leading-[1.1] tracking-tight text-cream sm:text-6xl md:text-7xl"
+          className="animate-fade-up mt-6 max-w-3xl text-balance font-display text-5xl font-bold leading-[1.1] tracking-tight text-cream sm:text-6xl md:text-7xl"
           style={{ animationDelay: "0.1s" }}
         >
           L&apos;Arte della Profumeria{" "}
-          <span className="text-gold-gradient italic">Invisibile</span>.
+          <span className="text-gold-gradient">Invisibile</span>.
         </h1>
         <p
-          className="animate-fade-up mt-4 font-display text-lg italic tracking-wide text-bronze sm:text-xl"
+          className="animate-fade-up mt-4 font-display text-lg font-semibold tracking-wide text-bronze sm:text-xl"
           style={{ animationDelay: "0.15s" }}
         >
           Fragranze Estratte a Freddo.
         </p>
         <p
-          className="animate-fade-up mt-6 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg"
+          className="animate-fade-up mt-6 max-w-xl text-balance text-lg font-medium leading-relaxed text-foreground-secondary sm:text-xl"
           style={{ animationDelay: "0.2s" }}
         >
           Note di nicchia formulate a Grasse. Crea il tuo profilo olfattivo o scopri la
@@ -49,14 +49,14 @@ export function Hero() {
         >
           <Link
             href="/catalog"
-            className="group flex items-center gap-2 rounded-sm bg-gold px-8 py-3.5 text-xs uppercase tracking-luxe text-obsidian transition-all hover:opacity-90"
+            className="group flex items-center gap-2 rounded-sm bg-gold px-8 py-3.5 text-xs font-semibold uppercase tracking-luxe text-obsidian transition-all hover:opacity-90"
           >
             Esplora le Fragranze
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
             href="/scent-finder"
-            className="rounded-sm border border-border px-8 py-3.5 text-xs uppercase tracking-luxe text-cream transition-colors hover:border-gold hover:text-gold"
+            className="rounded-sm border border-border px-8 py-3.5 text-xs font-semibold uppercase tracking-luxe text-cream transition-colors hover:border-gold hover:text-gold"
           >
             Crea il tuo Profilo Olfattivo
           </Link>
@@ -69,8 +69,8 @@ export function Hero() {
           {FRICTION_REDUCERS.map((reducer, index) => (
             <Fragment key={reducer}>
               {index > 0 && <span className="text-gold-soft/40">·</span>}
-              <span className="flex items-center gap-1.5 text-[11px] tracking-wide text-muted-foreground">
-                {index === 0 && <ShieldCheck className="h-3 w-3 text-gold-soft" />}
+              <span className="flex items-center gap-1.5 text-sm tracking-wide text-[#CBD5E1]">
+                {index === 0 && <ShieldCheck className="h-3.5 w-3.5 text-gold-soft" />}
                 {reducer}
               </span>
             </Fragment>

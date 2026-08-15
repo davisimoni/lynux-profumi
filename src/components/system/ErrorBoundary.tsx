@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <ShieldAlert className="h-7 w-7" />
         </div>
         <p className="mt-6 text-xs uppercase tracking-luxe text-gold">Imprevisto</p>
-        <h1 className="mt-2 font-display text-3xl font-light text-cream sm:text-4xl">
+        <h1 className="mt-2 font-display text-3xl font-semibold text-cream sm:text-4xl">
           Anche le essenze più rare, a volte, si disperdono
         </h1>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">

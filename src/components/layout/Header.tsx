@@ -33,7 +33,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="font-display text-2xl tracking-luxe text-cream transition-colors hover:text-gold"
+          className="font-display text-2xl font-semibold tracking-luxe text-cream transition-colors hover:text-gold"
         >
           LYNUX
         </Link>
@@ -119,7 +119,7 @@ export function Header() {
               side="right"
               className="w-full border-border bg-obsidian-raised sm:max-w-sm overflow-y-auto"
             >
-              <SheetTitle className="px-4 pt-4 font-display text-xl tracking-luxe text-cream">
+              <SheetTitle className="px-4 pt-4 font-display text-xl font-semibold tracking-luxe text-cream">
                 LYNUX
               </SheetTitle>
 

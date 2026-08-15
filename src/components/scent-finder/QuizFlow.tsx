@@ -61,7 +61,7 @@ export function QuizFlow() {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <p className="text-xs uppercase tracking-luxe text-gold">Il tuo Risultato</p>
-        <h1 className="mt-2 font-display text-3xl font-light text-cream sm:text-4xl">
+        <h1 className="mt-2 font-display text-3xl font-semibold text-cream sm:text-4xl">
           La tua essenza è {family.toLowerCase()}
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ export function QuizFlow() {
       <p className="text-center text-xs uppercase tracking-luxe text-gold">
         Domanda {step + 1} di {QUIZ_QUESTIONS.length}
       </p>
-      <h1 className="mt-3 text-center font-display text-3xl font-light text-cream sm:text-4xl">
+      <h1 className="mt-3 text-center font-display text-3xl font-semibold text-cream sm:text-4xl">
         {question.question}
       </h1>
 

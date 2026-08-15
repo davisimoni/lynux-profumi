@@ -11,7 +11,7 @@ export function Bestsellers() {
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-xs uppercase tracking-luxe text-gold">Le Più Desiderate</p>
-          <h2 className="font-display text-3xl font-light text-cream sm:text-4xl">
+          <h2 className="font-display text-3xl font-semibold text-cream sm:text-4xl">
             Bestseller Lynux
           </h2>
         </div>

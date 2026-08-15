@@ -3,9 +3,9 @@ export function BrandStory() {
     <section className="border-b border-border bg-obsidian">
       <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-6 lg:px-8">
         <p className="text-xs uppercase tracking-luxe text-gold">La Filosofia Lynux</p>
-        <p className="mt-8 font-display text-2xl font-light leading-relaxed text-cream sm:text-3xl">
+        <p className="mt-8 font-display text-2xl font-semibold leading-relaxed text-cream sm:text-3xl">
           Non crediamo nei profumi che si notano. Crediamo in quelli che si{" "}
-          <span className="italic text-gold-gradient">ricordano</span>. Ogni fragranza Lynux
+          <span className="text-gold-gradient">ricordano</span>. Ogni fragranza Lynux
           nasce da materie prime rare, selezionate senza compromessi, e composta in edizioni
           discrete per chi preferisce essere riconosciuto dalla propria assenza in una stanza,
           non dalla propria presenza.

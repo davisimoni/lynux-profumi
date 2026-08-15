@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center gap-4 px-4 text-center sm:px-6">
       <p className="text-xs uppercase tracking-luxe text-gold">Errore 404</p>
-      <h1 className="font-display text-4xl font-light text-cream">
+      <h1 className="font-display text-4xl font-semibold text-cream">
         Questa essenza è svanita
       </h1>
       <p className="text-sm text-muted-foreground">

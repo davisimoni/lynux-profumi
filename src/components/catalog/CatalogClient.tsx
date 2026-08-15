@@ -198,7 +198,7 @@ export function CatalogClient() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 flex flex-col gap-3 border-b border-border pb-8 text-center">
         <p className="text-xs uppercase tracking-luxe text-gold">La Collezione</p>
-        <h1 className="font-display text-4xl font-light text-cream">Catalogo Fragranze</h1>
+        <h1 className="font-display text-4xl font-semibold text-cream">Catalogo Fragranze</h1>
       </div>
 
       <div className="flex flex-col gap-10 lg:flex-row">

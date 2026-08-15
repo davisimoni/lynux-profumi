@@ -122,6 +122,7 @@ export function ProductArt({
             y={engravingText ? "286" : "292"}
             textAnchor="middle"
             fontFamily="var(--font-display), serif"
+            fontWeight="600"
             fontSize="18"
             letterSpacing="2"
             fill={accent}
@@ -135,7 +136,7 @@ export function ProductArt({
               y="307"
               textAnchor="middle"
               fontFamily="var(--font-display), serif"
-              fontStyle="italic"
+              fontWeight="600"
               fontSize="10"
               letterSpacing="0.5"
               fill={accent}
@@ -195,6 +196,7 @@ export function ProductArt({
             y="262"
             textAnchor="middle"
             fontFamily="var(--font-display), serif"
+            fontWeight="600"
             fontSize="42"
             letterSpacing="4"
             fill={accent}

@@ -134,7 +134,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
           <Sparkles className="h-4 w-4" />
           Custom Blend
         </p>
-        <h1 className="font-display text-4xl font-light text-cream sm:text-5xl">
+        <h1 className="font-display text-4xl font-semibold text-cream sm:text-5xl">
           Lynux Layering Lab
         </h1>
         <p className="max-w-xl text-sm text-muted-foreground">

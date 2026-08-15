@@ -19,7 +19,7 @@ export function QuizTeaser() {
             <Sparkles className="h-4 w-4" />
             Scent Discovery Quiz
           </span>
-          <h2 className="max-w-lg font-display text-3xl font-light leading-tight text-cream sm:text-4xl">
+          <h2 className="max-w-lg font-display text-3xl font-semibold leading-tight text-cream sm:text-4xl">
             Non sai quale fragranza scegliere?
           </h2>
           <p className="max-w-md text-sm text-muted-foreground">
