@@ -8,17 +8,11 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { CurrencySelector } from "@/components/layout/CurrencySelector";
 import { AtmosphereToggle } from "@/components/layout/AtmosphereToggle";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { useCartStore, cartItemCount } from "@/store/cart";
 import { useCommandPaletteStore } from "@/store/command-palette";
 import { useHasMounted } from "@/hooks/use-has-mounted";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/catalog", label: "Catalogo" },
-  { href: "/scent-finder", label: "Scent Finder" },
-  { href: "/custom-blend", label: "Layering Lab" },
-  { href: "/sample-discovery", label: "Discovery Set" },
-];
+import { useTranslation } from "@/hooks/use-translation";
 
 export function Header() {
   const pathname = usePathname();
@@ -27,6 +21,15 @@ export function Header() {
   const openCommandPalette = useCommandPaletteStore((state) => state.open);
   const mounted = useHasMounted();
   const count = mounted ? cartItemCount(items) : 0;
+  const { t } = useTranslation();
+
+  const NAV_LINKS = [
+    { href: "/", label: t.nav.home },
+    { href: "/catalog", label: t.nav.catalog },
+    { href: "/scent-finder", label: t.nav.scentFinder },
+    { href: "/custom-blend", label: t.nav.layeringLab },
+    { href: "/sample-discovery", label: t.nav.discoverySet },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-obsidian/85 backdrop-blur-md">
@@ -60,11 +63,11 @@ export function Header() {
           <button
             type="button"
             onClick={openCommandPalette}
-            aria-label="Apri la ricerca"
+            aria-label={t.nav.searchAria}
             className="hidden items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-gold hover:text-gold cursor-pointer sm:flex"
           >
             <Search className="h-3.5 w-3.5" />
-            <span>Cerca</span>
+            <span>{t.nav.search}</span>
             <kbd className="rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground/80">
               ⌘K
             </kbd>
@@ -73,7 +76,7 @@ export function Header() {
           <button
             type="button"
             onClick={openCommandPalette}
-            aria-label="Apri la ricerca"
+            aria-label={t.nav.searchAria}
             className="flex h-10 w-10 items-center justify-center rounded-sm text-cream transition-colors hover:text-gold cursor-pointer sm:hidden"
           >
             <Search className="h-5 w-5" />
@@ -81,6 +84,7 @@ export function Header() {
 
           <div className="hidden items-center gap-2 lg:flex">
             <AtmosphereToggle />
+            <LanguageToggle />
             <CurrencySelector />
           </div>
 
@@ -88,7 +92,7 @@ export function Header() {
             type="button"
             id="header-cart-icon"
             onClick={toggleCart}
-            aria-label="Apri il carrello"
+            aria-label={t.nav.cartAria}
             className="relative flex h-10 w-10 items-center justify-center rounded-sm text-cream transition-colors hover:text-gold cursor-pointer"
           >
             <ShoppingBag className="h-5 w-5" />
@@ -110,7 +114,7 @@ export function Header() {
 
           <Sheet>
             <SheetTrigger
-              aria-label="Apri il menu"
+              aria-label={t.nav.menuAria}
               className="flex h-10 w-10 items-center justify-center rounded-sm text-cream transition-colors hover:text-gold lg:hidden cursor-pointer"
             >
               <Menu className="h-5 w-5" />
@@ -137,27 +141,34 @@ export function Header() {
                   href="/track-order"
                   className="rounded-sm px-3 py-3 text-sm uppercase tracking-wide text-cream transition-colors hover:bg-secondary hover:text-gold"
                 >
-                  Traccia Ordine
+                  {t.nav.trackOrder}
                 </Link>
               </nav>
 
               <div className="mt-4 flex items-center justify-between px-4">
                 <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Atmosfera
+                  {t.nav.atmosphere}
                 </span>
                 <AtmosphereToggle />
               </div>
 
+              <div className="mt-3 flex items-center justify-between px-4">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t.nav.language}
+                </span>
+                <LanguageToggle />
+              </div>
+
               <div className="mt-3 flex items-center justify-between px-4 pb-6">
                 <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Valuta
+                  {t.nav.currency}
                 </span>
                 <CurrencySelector />
               </div>
 
               <div className="flex items-center gap-2 px-4 pb-6 text-xs text-muted-foreground">
                 <Sparkles className="h-4 w-4 text-gold" />
-                L&apos;Arte della Profumeria Invisibile
+                {t.nav.tagline}
               </div>
             </SheetContent>
           </Sheet>

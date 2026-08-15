@@ -1,4 +1,5 @@
 import type { OlfactoryFamily, OlfactoryNotes, Product } from "@/types/product";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 
 /**
  * Symmetric compatibility base-score (0-100) between two olfactory families,
@@ -19,39 +20,6 @@ export interface HarmonyResult {
   narrative: string;
 }
 
-const HARMONY_BANDS: { min: number; label: string; narrative: string }[] = [
-  {
-    min: 90,
-    label: "Armonia Eccezionale",
-    narrative:
-      "Le due fragranze condividono un'anima comune: si intrecciano come fossero nate per completarsi a vicenda.",
-  },
-  {
-    min: 80,
-    label: "Ottima Armonia",
-    narrative:
-      "Una combinazione raffinata: le famiglie olfattive dialogano con naturalezza, creando profondità senza sovrapporsi.",
-  },
-  {
-    min: 70,
-    label: "Buona Armonia",
-    narrative:
-      "Un accostamento equilibrato, con qualche sfumatura di contrasto che rende la scia più complessa e interessante.",
-  },
-  {
-    min: 60,
-    label: "Armonia Sperimentale",
-    narrative:
-      "Un abbinamento sperimentale: le due anime convivono, ma premiano un'applicazione attenta e misurata.",
-  },
-  {
-    min: 0,
-    label: "Combinazione Audace",
-    narrative:
-      "Una scelta audace e non convenzionale — il contrasto netto tra le due famiglie crea una firma olfattiva unica, per chi non teme di osare.",
-  },
-];
-
 function sharedNoteBonus(a: Product, b: Product): number {
   const notesA = new Set([...a.notes.top, ...a.notes.heart, ...a.notes.base]);
   const notesB = new Set([...b.notes.top, ...b.notes.heart, ...b.notes.base]);
@@ -62,11 +30,12 @@ function sharedNoteBonus(a: Product, b: Product): number {
   return Math.min(6, shared * 2);
 }
 
-export function computeHarmony(a: Product, b: Product): HarmonyResult {
+export function computeHarmony(a: Product, b: Product, t: Dictionary): HarmonyResult {
   const base = FAMILY_COMPATIBILITY[a.family][b.family];
   const bonus = a.id === b.id ? 0 : sharedNoteBonus(a, b);
   const score = Math.max(0, Math.min(100, Math.round(base + bonus)));
-  const band = HARMONY_BANDS.find((entry) => score >= entry.min) ?? HARMONY_BANDS.at(-1)!;
+  const bands = t.blend.harmonyBands;
+  const band = bands.find((entry) => score >= entry.min) ?? bands[bands.length - 1];
 
   return { score, label: band.label, narrative: band.narrative };
 }

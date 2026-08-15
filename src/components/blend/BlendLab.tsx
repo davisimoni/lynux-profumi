@@ -18,6 +18,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useMoney } from "@/hooks/use-money";
 import { useCartStore } from "@/store/cart";
+import { useTranslation } from "@/hooks/use-translation";
+import { localizeProduct } from "@/lib/i18n/localize-product";
 
 const DUO_DISCOUNT = 0.1;
 
@@ -34,16 +36,17 @@ function downloadTextFile(filename: string, content: string) {
 }
 
 export function BlendLab() {
+  const { locale, t } = useTranslation();
   const [productAId, setProductAId] = useState(products[0].id);
   const [productBId, setProductBId] = useState(products[2].id);
   const [sizeIndex, setSizeIndex] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
   const money = useMoney();
 
-  const productA = products.find((p) => p.id === productAId) ?? products[0];
-  const productB = products.find((p) => p.id === productBId) ?? products[1];
+  const productA = localizeProduct(products.find((p) => p.id === productAId) ?? products[0], locale);
+  const productB = localizeProduct(products.find((p) => p.id === productBId) ?? products[1], locale);
 
-  const harmony = useMemo(() => computeHarmony(productA, productB), [productA, productB]);
+  const harmony = useMemo(() => computeHarmony(productA, productB, t), [productA, productB, t]);
   const mergedNotes = useMemo(() => mergeNotes(productA, productB), [productA, productB]);
 
   const sizeA = productA.sizes[sizeIndex] ?? productA.sizes[0];
@@ -92,33 +95,34 @@ export function BlendLab() {
       accent: productB.accent,
     });
 
-    toast.success("Duo Set aggiunto al carrello", {
+    toast.success(t.blend.addedToast, {
       description: `${productA.name} + ${productB.name} · ${sizeA.label}`,
     });
   }
 
   function handleDownloadProfile() {
-    const date = new Date().toLocaleDateString("it-IT", {
+    const date = new Date().toLocaleDateString(locale === "it" ? "it-IT" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
+    const f = t.blend.downloadFile;
 
-    const content = `LYNUX PROFUMI — LAYERING LAB
-Profilo di Fragranza Combinato
+    const content = `${f.title}
+${f.subtitle}
 
-Fragranza A: ${productA.name} (${productA.family})
-Fragranza B: ${productB.name} (${productB.family})
+${f.fragranceA}: ${productA.name} (${t.families[productA.family]})
+${f.fragranceB}: ${productB.name} (${t.families[productB.family]})
 
-Scent Harmony Score: ${harmony.score}% — ${harmony.label}
+${f.harmonyScoreLabel}: ${harmony.score}% — ${harmony.label}
 ${harmony.narrative}
 
-PIRAMIDE OLFATTIVA COMBINATA
-Note di Testa: ${mergedNotes.top.join(", ")}
-Note di Cuore: ${mergedNotes.heart.join(", ")}
-Note di Fondo: ${mergedNotes.base.join(", ")}
+${f.pyramidTitle}
+${f.topNotes}: ${mergedNotes.top.join(", ")}
+${f.heartNotes}: ${mergedNotes.heart.join(", ")}
+${f.baseNotes}: ${mergedNotes.base.join(", ")}
 
-Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
+${f.generatedOn(date)}
 `;
 
     downloadTextFile(
@@ -132,20 +136,17 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
       <div className="mb-12 flex flex-col items-center gap-3 text-center">
         <p className="flex items-center gap-2 text-xs uppercase tracking-luxe text-gold">
           <Sparkles className="h-4 w-4" />
-          Custom Blend
+          {t.blend.eyebrow}
         </p>
         <h1 className="font-display text-4xl font-semibold text-cream sm:text-5xl">
-          Lynux Layering Lab
+          {t.blend.title}
         </h1>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          Combina due fragranze Lynux e scopri il loro Scent Harmony Score: un&apos;analisi delle
-          famiglie olfattive che genera una firma unica, fusa in un&apos;unica piramide combinata.
-        </p>
+        <p className="max-w-xl text-sm text-muted-foreground">{t.blend.subtitle}</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="rounded-md border border-border bg-card p-5">
-          <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Fragranza A</p>
+          <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.blend.fragranceA}</p>
           <div className="aspect-square overflow-hidden rounded-sm bg-obsidian">
             <ProductArt accent={productA.accent} accentSoft={productA.accentSoft} variant="bottle" />
           </div>
@@ -156,7 +157,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
             <SelectContent>
               {products.map((product) => (
                 <SelectItem key={product.id} value={product.id}>
-                  {product.name} — {product.family}
+                  {product.name} — {t.families[product.family]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -164,7 +165,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
         </div>
 
         <div className="rounded-md border border-border bg-card p-5">
-          <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Fragranza B</p>
+          <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.blend.fragranceB}</p>
           <div className="aspect-square overflow-hidden rounded-sm bg-obsidian">
             <ProductArt accent={productB.accent} accentSoft={productB.accentSoft} variant="bottle" />
           </div>
@@ -175,7 +176,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
             <SelectContent>
               {products.map((product) => (
                 <SelectItem key={product.id} value={product.id}>
-                  {product.name} — {product.family}
+                  {product.name} — {t.families[product.family]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -195,7 +196,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
       </div>
 
       <div className="mt-10 rounded-md border border-border bg-card p-6 sm:p-8">
-        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Formato del Duo Set</p>
+        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.blend.formatLabel}</p>
         <div className="grid grid-cols-3 gap-3">
           {productA.sizes.map((size, index) => (
             <button
@@ -217,7 +218,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
         <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {productA.name} + {productB.name} · sconto duo 10%
+              {t.blend.discountLabel(productA.name, productB.name)}
             </p>
             <div className="flex items-baseline gap-3">
               <span className="font-display text-3xl text-gold">{money(discountedPrice)}</span>
@@ -234,7 +235,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
               className="flex items-center justify-center gap-2 rounded-sm border border-border px-5 py-3 text-xs uppercase tracking-wide text-cream transition-colors hover:border-gold hover:text-gold cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />
-              Scarica il Profilo
+              {t.blend.downloadProfile}
             </button>
             <button
               type="button"
@@ -242,7 +243,7 @@ Generato il ${date} — lynuxprofumi.com (progetto demo di portfolio)
               className="flex items-center justify-center gap-2 rounded-sm bg-gold px-5 py-3 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 cursor-pointer"
             >
               <ShoppingBag className="h-3.5 w-3.5" />
-              Aggiungi il Duo Set
+              {t.blend.addDuoSet}
             </button>
           </div>
         </div>

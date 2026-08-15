@@ -13,25 +13,30 @@ import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
 import { useMoney } from "@/hooks/use-money";
+import { useTranslation } from "@/hooks/use-translation";
+import { localizeProduct } from "@/lib/i18n/localize-product";
 import { ENGRAVING_MARKER, ENGRAVING_MAX_LENGTH, ENGRAVING_PRICE } from "@/lib/checkout/pricing";
 
 const SAMPLE_SIZE_LABEL = "Sample Kit (10ml)";
-
-const GALLERY: { variant: ProductArtVariant; label: string }[] = [
-  { variant: "bottle", label: "Flacone" },
-  { variant: "aura", label: "Aura Olfattiva" },
-  { variant: "liquid", label: "Texture" },
-  { variant: "cap", label: "Dettaglio Tappo" },
-];
 
 interface ProductDetailProps {
   product: Product;
 }
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ product: rawProduct }: ProductDetailProps) {
   const addItem = useCartStore((state) => state.addItem);
   const triggerFlyToCart = useFlyToCartStore((state) => state.trigger);
   const money = useMoney();
+  const { locale, t } = useTranslation();
+  const product = localizeProduct(rawProduct, locale);
+
+  const GALLERY: { variant: ProductArtVariant; label: string }[] = [
+    { variant: "bottle", label: t.product.detail.gallery.bottle },
+    { variant: "aura", label: t.product.detail.gallery.aura },
+    { variant: "liquid", label: t.product.detail.gallery.liquid },
+    { variant: "cap", label: t.product.detail.gallery.cap },
+  ];
+
   const [activeVariant, setActiveVariant] = useState<ProductArtVariant>("bottle");
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(1);
   const [quantity, setQuantity] = useState(1);
@@ -93,8 +98,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
           },
           quantity,
         );
-        toast.success(`${product.name} aggiunto al carrello`, {
-          description: `${finalSizeLabel} · Quantità ${quantity}`,
+        toast.success(t.product.detail.addedToast(product.name), {
+          description: `${finalSizeLabel} · ${t.product.detail.quantityLabel(quantity)}`,
         });
         setStatus("added");
       }, 450),
@@ -139,7 +144,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
         <div className="flex flex-col">
           <p className="text-xs uppercase tracking-luxe text-gold">
-            {product.family} · {product.gender}
+            {t.families[product.family]} {t.product.detail.genderSeparator} {t.genders[product.gender]}
           </p>
           <h1 className="mt-3 font-display text-4xl font-semibold text-cream sm:text-5xl">
             {product.name}
@@ -151,12 +156,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </p>
 
           <div className="mt-5 space-y-2 rounded-sm border border-border p-4">
-            <ScentMeter label="Scia" value={product.sillage} />
-            <ScentMeter label="Durata" value={product.longevity} />
+            <ScentMeter label={t.product.detail.sillage} value={product.sillage} />
+            <ScentMeter label={t.product.detail.longevity} value={product.longevity} />
           </div>
 
           <div className="mt-8">
-            <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Formato</p>
+            <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.product.detail.formatLabel}</p>
             <div className="grid grid-cols-3 gap-3">
               {product.sizes.map((size, index) => (
                 <button
@@ -194,11 +199,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 />
                 <span>
                   <span className="block text-sm text-cream">
-                    Incisione Personalizzata Boccetta{" "}
+                    {t.product.detail.engravingLabel}{" "}
                     <span className="text-gold">(+{money(ENGRAVING_PRICE)})</span>
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    Un&apos;iscrizione elegante incisa sul flacone, in anteprima dal vivo qui accanto.
+                    {t.product.detail.engravingHint}
                   </span>
                 </span>
               </label>
@@ -209,7 +214,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     value={engravingText}
                     onChange={(event) => setEngravingText(event.target.value.slice(0, ENGRAVING_MAX_LENGTH))}
                     maxLength={ENGRAVING_MAX_LENGTH}
-                    placeholder="Il tuo nome o messaggio"
+                    placeholder={t.product.detail.engravingPlaceholder}
                     className="w-full rounded-sm border border-border bg-transparent px-3.5 py-2.5 text-sm uppercase tracking-wide text-cream placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-gold"
                   />
                   <p className="mt-1.5 text-right text-[11px] text-muted-foreground">
@@ -224,7 +229,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <div className="flex items-center gap-3 rounded-sm border border-border px-3 py-2.5">
               <button
                 type="button"
-                aria-label="Diminuisci quantità"
+                aria-label={t.product.detail.decreaseAria}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="text-muted-foreground hover:text-gold cursor-pointer"
               >
@@ -233,7 +238,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <span className="w-4 text-center text-sm text-cream">{quantity}</span>
               <button
                 type="button"
-                aria-label="Aumenta quantità"
+                aria-label={t.product.detail.increaseAria}
                 onClick={() => setQuantity((q) => Math.min(9, q + 1))}
                 className="text-muted-foreground hover:text-gold cursor-pointer"
               >
@@ -253,26 +258,26 @@ export function ProductDetail({ product }: ProductDetailProps) {
               {status === "idle" && (
                 <>
                   <ShoppingBag className="h-4 w-4" />
-                  Aggiungi al Carrello · {money(unitPriceWithEngraving * quantity)}
+                  {t.product.detail.addToCart} · {money(unitPriceWithEngraving * quantity)}
                 </>
               )}
               {status === "adding" && (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Aggiunta in corso
+                  {t.product.detail.adding}
                 </>
               )}
               {status === "added" && (
                 <>
                   <Check className="h-4 w-4" />
-                  Aggiunto al Carrello
+                  {t.product.detail.added}
                 </>
               )}
             </button>
           </div>
 
           <div className="mt-10 border-t border-border pt-8">
-            <p className="text-xs uppercase tracking-luxe text-gold">La Storia</p>
+            <p className="text-xs uppercase tracking-luxe text-gold">{t.product.detail.storyLabel}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{product.story}</p>
           </div>
         </div>
@@ -313,8 +318,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 {status === "idle" && (
                   <>
                     <ShoppingBag className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Aggiungi al Carrello</span>
-                    <span className="sm:hidden">Aggiungi</span>
+                    <span className="hidden sm:inline">{t.product.detail.addToCart}</span>
+                    <span className="sm:hidden">{t.product.detail.addToCartShort}</span>
                   </>
                 )}
                 {status === "adding" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

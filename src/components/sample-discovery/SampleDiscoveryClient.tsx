@@ -9,6 +9,8 @@ import { ProductArt } from "@/components/product/ProductArt";
 import { cn } from "@/lib/utils";
 import { useMoney } from "@/hooks/use-money";
 import { useCartStore } from "@/store/cart";
+import { useTranslation } from "@/hooks/use-translation";
+import { localizeProduct } from "@/lib/i18n/localize-product";
 import {
   DISCOVERY_SET_SAMPLE_COUNT,
   DISCOVERY_SET_SUFFIX,
@@ -24,6 +26,7 @@ function referenceSamplePrice(productId: string): number {
 }
 
 export function SampleDiscoveryClient() {
+  const { locale, t } = useTranslation();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const addItem = useCartStore((state) => state.addItem);
   const money = useMoney();
@@ -66,8 +69,8 @@ export function SampleDiscoveryClient() {
       });
     }
 
-    toast.success("Discovery Set aggiunto al carrello", {
-      description: `5 campioni · ${money(DISCOVERY_SET_TOTAL_PRICE)}`,
+    toast.success(t.discovery.addedToast, {
+      description: t.discovery.addedToastDescription(DISCOVERY_SET_SAMPLE_COUNT),
     });
     setSelected(new Set());
   }
@@ -75,15 +78,11 @@ export function SampleDiscoveryClient() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="mb-4 flex flex-col items-center gap-3 text-center">
-        <p className="text-xs uppercase tracking-luxe text-gold">Discovery Set · 5x10ml</p>
+        <p className="text-xs uppercase tracking-luxe text-gold">{t.discovery.eyebrow}</p>
         <h1 className="font-display text-4xl font-semibold text-cream sm:text-5xl">
-          Componi la tua Collezione di Scoperta
+          {t.discovery.title}
         </h1>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          Scegli 5 fragranze Lynux in formato campione da 10ml a un prezzo promozionale unico. Ogni
-          Discovery Set include inoltre la promessa di un voucher di pari importo, da utilizzare
-          sull&apos;acquisto di un formato 100ml entro 60 giorni.
-        </p>
+        <p className="max-w-xl text-sm text-muted-foreground">{t.discovery.description}</p>
       </div>
 
       <div className="mx-auto mt-8 flex max-w-lg items-center gap-3 rounded-sm border border-gold/30 bg-gold/5 px-5 py-4 text-left">
@@ -91,13 +90,14 @@ export function SampleDiscoveryClient() {
           <Ticket className="h-4 w-4" />
         </span>
         <p className="text-xs text-muted-foreground">
-          <span className="text-gold">Promessa Lynux Vault:</span> {money(DISCOVERY_SET_TOTAL_PRICE)}{" "}
-          spesi oggi diventano un voucher di pari importo verso il tuo prossimo flacone da 100ml.
+          <span className="text-gold">{t.discovery.voucherLabel}</span> {money(DISCOVERY_SET_TOTAL_PRICE)}{" "}
+          {t.discovery.voucherText}
         </p>
       </div>
 
       <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {products.map((product) => {
+        {products.map((rawProduct) => {
+          const product = localizeProduct(rawProduct, locale);
           const isSelected = selected.has(product.id);
           const isDisabled = !isSelected && isComplete;
 
@@ -127,7 +127,7 @@ export function SampleDiscoveryClient() {
               <div className="p-2.5">
                 <p className="truncate font-display text-sm text-cream">{product.name}</p>
                 <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {product.family}
+                  {t.families[product.family]}
                 </p>
               </div>
             </button>
@@ -138,9 +138,7 @@ export function SampleDiscoveryClient() {
       <div className="glass-panel sticky bottom-4 mt-10 flex flex-col items-center gap-4 rounded-md p-6 text-center sm:flex-row sm:justify-between sm:text-left">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {isComplete
-              ? "Selezione completa"
-              : `Seleziona ancora ${remaining} ${remaining === 1 ? "fragranza" : "fragranze"}`}
+            {isComplete ? t.discovery.complete : t.discovery.remaining(remaining)}
           </p>
           <p className="mt-1 flex items-baseline justify-center gap-2 sm:justify-start">
             <span className="font-display text-2xl text-gold">{money(DISCOVERY_SET_TOTAL_PRICE)}</span>
@@ -156,7 +154,7 @@ export function SampleDiscoveryClient() {
           className="flex items-center justify-center gap-2 rounded-sm bg-gold px-6 py-3.5 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
         >
           <ShoppingBag className="h-3.5 w-3.5" />
-          Aggiungi il Discovery Set ({selected.size}/{DISCOVERY_SET_SAMPLE_COUNT})
+          {t.discovery.addToCart(selected.size, DISCOVERY_SET_SAMPLE_COUNT)}
         </button>
       </div>
     </div>

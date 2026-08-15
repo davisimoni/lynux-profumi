@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 
 function InstagramIcon() {
   return (
@@ -20,27 +23,26 @@ function FacebookIcon() {
 }
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-border bg-obsidian">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2 space-y-4">
             <span className="font-display text-2xl font-semibold tracking-luxe text-cream">LYNUX</span>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Profumeria di nicchia per chi cerca l&apos;essenza, non l&apos;ovvio. Fragranze
-              composte con materie prime rare, in edizioni discrete e senza compromessi.
-            </p>
+            <p className="max-w-sm text-sm text-muted-foreground">{t.footer.description}</p>
             <div className="flex items-center gap-4 pt-1">
               <a
                 href="#"
-                aria-label="Instagram"
+                aria-label={t.footer.instagram}
                 className="text-muted-foreground transition-colors hover:text-gold"
               >
                 <InstagramIcon />
               </a>
               <a
                 href="#"
-                aria-label="Facebook"
+                aria-label={t.footer.facebook}
                 className="text-muted-foreground transition-colors hover:text-gold"
               >
                 <FacebookIcon />
@@ -49,44 +51,44 @@ export function Footer() {
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-luxe text-gold">Shop</p>
+            <p className="text-xs uppercase tracking-luxe text-gold">{t.footer.shop}</p>
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/catalog" className="transition-colors hover:text-cream">
-                Catalogo
+                {t.nav.catalog}
               </Link>
               <Link href="/scent-finder" className="transition-colors hover:text-cream">
-                Scent Finder
+                {t.nav.scentFinder}
               </Link>
               <Link href="/custom-blend" className="transition-colors hover:text-cream">
-                Layering Lab
+                {t.nav.layeringLab}
               </Link>
               <Link href="/sample-discovery" className="transition-colors hover:text-cream">
-                Discovery Set
+                {t.nav.discoverySet}
               </Link>
               <Link href="/checkout" className="transition-colors hover:text-cream">
-                Checkout
+                {t.footer.checkout}
               </Link>
             </nav>
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-luxe text-gold">Assistenza</p>
+            <p className="text-xs uppercase tracking-luxe text-gold">{t.footer.assistance}</p>
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/track-order" className="transition-colors hover:text-cream">
-                Traccia il tuo Ordine
+                {t.footer.trackOrder}
               </Link>
-              <span className="cursor-default">Spedizioni &amp; Resi</span>
-              <span className="cursor-default">Contattaci</span>
-              <span className="cursor-default">Termini &amp; Privacy</span>
+              <span className="cursor-default">{t.footer.shippingReturns}</span>
+              <span className="cursor-default">{t.footer.contact}</span>
+              <span className="cursor-default">{t.footer.termsPrivacy}</span>
             </nav>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-1 border-t border-border pt-6 text-center text-xs text-muted-foreground sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} Lynux Profumi. Tutti i diritti riservati.</p>
+          <p>{t.footer.rights(new Date().getFullYear())}</p>
           <p className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-gold" />
-            Progetto demo di portfolio — nessun pagamento reale viene elaborato.
+            {t.footer.demoNotice}
           </p>
         </div>
       </div>

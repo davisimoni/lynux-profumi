@@ -13,6 +13,8 @@ import { useCartStore } from "@/store/cart";
 import { useFlyToCartStore } from "@/store/fly-to-cart";
 import { useQuickViewStore } from "@/store/quick-view";
 import { useMoney } from "@/hooks/use-money";
+import { useTranslation } from "@/hooks/use-translation";
+import { localizeProduct } from "@/lib/i18n/localize-product";
 
 const CONCENTRATION_PERCENT: Record<Concentration, string> = {
   "Extrait de Parfum": "25%",
@@ -23,11 +25,13 @@ interface ProductCardProps {
   product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product: rawProduct }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const triggerFlyToCart = useFlyToCartStore((state) => state.trigger);
   const openQuickView = useQuickViewStore((state) => state.open);
   const money = useMoney();
+  const { locale, t } = useTranslation();
+  const product = localizeProduct(rawProduct, locale);
   const defaultSize = product.sizes[1] ?? product.sizes[0];
 
   function handleQuickAdd(event: MouseEvent<HTMLButtonElement>) {
@@ -44,14 +48,14 @@ export function ProductCard({ product }: ProductCardProps) {
       unitPrice: defaultSize.price,
       accent: product.accent,
     });
-    toast.success(`${product.name} aggiunto al carrello`, {
+    toast.success(t.product.detail.addedToast(product.name), {
       description: defaultSize.label,
     });
   }
 
   function handleQuickView(event: MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
-    openQuickView(product);
+    openQuickView(rawProduct);
   }
 
   return (
@@ -63,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link
         href={`/product/${product.slug}`}
         className="absolute inset-0 z-10"
-        aria-label={`Vedi dettagli di ${product.name}`}
+        aria-label={t.product.card.viewDetailsAria(product.name)}
       />
 
       <div className="relative aspect-[4/5] overflow-hidden bg-obsidian">
@@ -77,17 +81,17 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
           {product.isNew && (
             <Badge variant="outline" className="border-gold/60 text-gold tracking-wide">
-              Novità
+              {locale === "it" ? "Novità" : "New"}
             </Badge>
           )}
         </div>
         <span className="absolute bottom-3 left-3 rounded-sm border border-gold/25 bg-obsidian/60 px-2.5 py-1 text-[10px] uppercase tracking-wide text-gold/90 backdrop-blur-sm">
-          {product.concentration} · {CONCENTRATION_PERCENT[product.concentration]}
+          {t.concentrations[product.concentration]} · {CONCENTRATION_PERCENT[product.concentration]}
         </span>
         <button
           type="button"
           onClick={handleQuickView}
-          aria-label={`Anteprima olfattiva di ${product.name}`}
+          aria-label={t.product.card.quickViewAria(product.name)}
           className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-gold/30 bg-obsidian/70 text-cream opacity-100 backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
         >
           <Eye className="h-4 w-4" />
@@ -97,7 +101,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="space-y-4 p-6">
         <div className="space-y-1.5">
           <p className="text-[11px] uppercase tracking-luxe text-muted-foreground">
-            {product.family}
+            {t.families[product.family]}
           </p>
           <h3 className="font-display text-xl tracking-tight text-cream">{product.name}</h3>
           <p className="text-sm leading-relaxed text-muted-foreground">{product.tagline}</p>
@@ -108,8 +112,8 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="space-y-1.5 border-t border-border pt-4">
-          <ScentMeter label="Scia" value={product.sillage} compact />
-          <ScentMeter label="Durata" value={product.longevity} compact />
+          <ScentMeter label={t.product.detail.sillage} value={product.sillage} compact />
+          <ScentMeter label={t.product.detail.longevity} value={product.longevity} compact />
         </div>
 
         <div className="flex items-center justify-between pt-1">
@@ -122,7 +126,7 @@ export function ProductCard({ product }: ProductCardProps) {
             className="relative z-20 flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs uppercase tracking-wide text-cream transition-colors duration-300 hover:border-gold hover:text-gold cursor-pointer"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
-            Aggiungi
+            {t.product.card.addToCart}
           </button>
         </div>
       </div>

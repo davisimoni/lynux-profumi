@@ -19,9 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { computeAdminMetrics } from "@/lib/admin/metrics";
-import { ADMIN_STATUS_LABELS, ORDER_STATUSES, type OrderStatus, type PersistedOrder } from "@/lib/orders/types";
+import { ORDER_STATUSES, type OrderStatus, type PersistedOrder } from "@/lib/orders/types";
 import { useMoney } from "@/hooks/use-money";
 import { formatMoney } from "@/lib/currency";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface AdminDashboardProps {
   adminCode: string;
@@ -32,6 +33,7 @@ function authHeaders(adminCode: string): HeadersInit {
 }
 
 export function AdminDashboard({ adminCode }: AdminDashboardProps) {
+  const { locale, t } = useTranslation();
   const [orders, setOrders] = useState<PersistedOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -44,13 +46,13 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
     try {
       const response = await fetch("/api/orders", { headers: authHeaders(adminCode) });
       if (!response.ok) {
-        setLoadError("Impossibile caricare gli ordini.");
+        setLoadError(t.admin.loadError);
         return;
       }
       const data = (await response.json()) as { orders: PersistedOrder[] };
       setOrders(data.orders);
     } catch {
-      setLoadError("Errore di rete durante il caricamento degli ordini.");
+      setLoadError(t.admin.loadNetworkError);
     } finally {
       setLoading(false);
     }
@@ -77,17 +79,17 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
       });
 
       if (!response.ok) {
-        toast.error("Aggiornamento stato non riuscito.");
+        toast.error(t.admin.updateFailed);
         return;
       }
 
       const data = (await response.json()) as { order: PersistedOrder };
       setOrders((prev) => prev.map((order) => (order.orderNumber === orderNumber ? data.order : order)));
-      toast.success(`Ordine ${orderNumber} aggiornato`, {
-        description: ADMIN_STATUS_LABELS[status],
+      toast.success(t.admin.orderUpdatedToast(orderNumber), {
+        description: t.admin.statusLabels[status],
       });
     } catch {
-      toast.error("Errore di rete durante l'aggiornamento.");
+      toast.error(t.admin.updateNetworkError);
     } finally {
       setUpdatingOrder(null);
     }
@@ -97,8 +99,8 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-luxe text-gold">Area Riservata</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold text-cream">Admin Dashboard</h1>
+          <p className="text-xs uppercase tracking-luxe text-gold">{t.admin.restrictedArea}</p>
+          <h1 className="mt-2 font-display text-4xl font-semibold text-cream">{t.admin.title}</h1>
         </div>
         <button
           type="button"
@@ -107,7 +109,7 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
           className="flex items-center gap-2 rounded-sm border border-border px-4 py-2.5 text-xs uppercase tracking-wide text-cream transition-colors hover:border-gold hover:text-gold disabled:opacity-60 cursor-pointer"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-          Aggiorna
+          {t.admin.refresh}
         </button>
       </div>
 
@@ -120,34 +122,34 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           icon={TrendingUp}
-          label="Fatturato Totale"
+          label={t.admin.metrics.totalRevenue}
           value={money(metrics.totalRevenueEur)}
         />
-        <MetricCard icon={ShoppingCart} label="Volume Ordini" value={String(metrics.orderCount)} />
+        <MetricCard icon={ShoppingCart} label={t.admin.metrics.orderVolume} value={String(metrics.orderCount)} />
         <MetricCard
           icon={Crown}
-          label="Profumo più Venduto"
+          label={t.admin.metrics.bestSeller}
           value={metrics.bestSeller ? metrics.bestSeller.name : "—"}
-          detail={metrics.bestSeller ? `${metrics.bestSeller.unitsSold} unità vendute` : undefined}
+          detail={metrics.bestSeller ? t.admin.metrics.unitsSold(metrics.bestSeller.unitsSold) : undefined}
         />
         <MetricCard
           icon={Boxes}
-          label="Referenze in Scorta Bassa"
+          label={t.admin.metrics.lowStock}
           value={String(metrics.inventory.filter((row) => row.lowStock).length)}
-          detail={`su ${metrics.inventory.length} referenze`}
+          detail={t.admin.metrics.ofReferences(metrics.inventory.length)}
         />
       </div>
 
       <div className="mt-10 rounded-md border border-border bg-card p-6 sm:p-8">
-        <p className="mb-5 text-xs uppercase tracking-luxe text-gold">Inventario Boccette</p>
+        <p className="mb-5 text-xs uppercase tracking-luxe text-gold">{t.admin.inventoryTitle}</p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="pb-3 font-normal">Fragranza</th>
-                <th className="pb-3 font-normal">Scorta Iniziale</th>
-                <th className="pb-3 font-normal">Vendute</th>
-                <th className="pb-3 font-normal">Rimanenti</th>
+                <th className="pb-3 font-normal">{t.admin.inventoryColumns.fragrance}</th>
+                <th className="pb-3 font-normal">{t.admin.inventoryColumns.initialStock}</th>
+                <th className="pb-3 font-normal">{t.admin.inventoryColumns.sold}</th>
+                <th className="pb-3 font-normal">{t.admin.inventoryColumns.remaining}</th>
               </tr>
             </thead>
             <tbody>
@@ -176,16 +178,16 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
       </div>
 
       <div className="mt-10 rounded-md border border-border bg-card p-6 sm:p-8">
-        <p className="mb-5 text-xs uppercase tracking-luxe text-gold">Gestione Ordini</p>
+        <p className="mb-5 text-xs uppercase tracking-luxe text-gold">{t.admin.ordersTitle}</p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="pb-3 font-normal">Ordine</th>
-                <th className="pb-3 font-normal">Cliente</th>
-                <th className="pb-3 font-normal">Data</th>
-                <th className="pb-3 font-normal">Totale</th>
-                <th className="pb-3 font-normal">Stato</th>
+                <th className="pb-3 font-normal">{t.admin.ordersColumns.order}</th>
+                <th className="pb-3 font-normal">{t.admin.ordersColumns.customer}</th>
+                <th className="pb-3 font-normal">{t.admin.ordersColumns.date}</th>
+                <th className="pb-3 font-normal">{t.admin.ordersColumns.total}</th>
+                <th className="pb-3 font-normal">{t.admin.ordersColumns.status}</th>
               </tr>
             </thead>
             <tbody>
@@ -196,7 +198,7 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
                     {order.shippingAddress.firstName} {order.shippingAddress.lastName}
                   </td>
                   <td className="py-3 text-muted-foreground">
-                    {new Date(order.createdAt).toLocaleDateString("it-IT", {
+                    {new Date(order.createdAt).toLocaleDateString(locale === "it" ? "it-IT" : "en-US", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
@@ -217,7 +219,7 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
                       <SelectContent>
                         {ORDER_STATUSES.map((status) => (
                           <SelectItem key={status} value={status}>
-                            {ADMIN_STATUS_LABELS[status]}
+                            {t.admin.statusLabels[status]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -228,17 +230,12 @@ export function AdminDashboard({ adminCode }: AdminDashboardProps) {
             </tbody>
           </table>
           {orders.length === 0 && !loading && (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              Nessun ordine trovato.
-            </p>
+            <p className="py-10 text-center text-sm text-muted-foreground">{t.admin.noOrders}</p>
           )}
         </div>
       </div>
 
-      <p className="mt-8 text-center text-xs text-muted-foreground">
-        Dashboard demo di portfolio. In assenza di Supabase, ordini e inventario sono calcolati su
-        dati dimostrativi in memoria del server.
-      </p>
+      <p className="mt-8 text-center text-xs text-muted-foreground">{t.admin.demoFooter}</p>
     </div>
   );
 }

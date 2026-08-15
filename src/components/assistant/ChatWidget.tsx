@@ -6,19 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, Sparkles, X } from "lucide-react";
 import { useAssistantStore, type ChatMessage } from "@/store/assistant";
 import { useHasMounted } from "@/hooks/use-has-mounted";
-
-const WELCOME_MESSAGE: ChatMessage = {
-  id: "welcome",
-  role: "assistant",
-  content:
-    "Ciao, sono il concierge digitale di Lynux Profumi. Posso consigliarti una fragranza, spiegarti spedizioni e pagamenti, o aiutarti a tracciare un ordine.",
-};
-
-const QUICK_REPLIES = [
-  "Consigliami un profumo legnoso",
-  "Come funziona la spedizione?",
-  "Traccia il mio ordine",
-];
+import { useTranslation } from "@/hooks/use-translation";
 
 interface ChatWidgetProps {
   aiEnabled: boolean;
@@ -26,6 +14,15 @@ interface ChatWidgetProps {
 
 export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
   const mounted = useHasMounted();
+  const { locale, t } = useTranslation();
+
+  const WELCOME_MESSAGE: ChatMessage = {
+    id: "welcome",
+    role: "assistant",
+    content: t.chat.welcome,
+  };
+
+  const QUICK_REPLIES = t.chat.quickReplies;
   const isOpen = useAssistantStore((state) => state.isOpen);
   const messages = useAssistantStore((state) => state.messages);
   const sending = useAssistantStore((state) => state.sending);
@@ -59,6 +56,7 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: history.map((message) => ({ role: message.role, content: message.content })),
+          locale,
         }),
       });
       const data = await response.json();
@@ -66,14 +64,14 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
       addMessage({
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.reply?.text ?? "Non sono riuscito a rispondere. Riprova tra poco.",
+        content: data.reply?.text ?? t.chat.genericError,
         link: data.reply?.link,
       });
     } catch {
       addMessage({
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Errore di rete — riprova tra un istante.",
+        content: t.chat.networkError,
       });
     } finally {
       setSending(false);
@@ -104,16 +102,16 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
                 <div>
-                  <p className="font-display text-sm text-cream">Lynux Olfactive Concierge</p>
+                  <p className="font-display text-sm text-cream">{t.chat.name}</p>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    {aiEnabled ? "Assistente AI" : "Assistente Lynux"}
+                    {aiEnabled ? t.chat.aiLabel : t.chat.fallbackLabel}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={close}
-                aria-label="Chiudi la chat"
+                aria-label={t.chat.closeAria}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-gold cursor-pointer"
               >
                 <X className="h-4 w-4" />
@@ -177,13 +175,13 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
               <input
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Scrivi un messaggio…"
+                placeholder={t.chat.inputPlaceholder}
                 className="flex-1 rounded-sm border border-border bg-transparent px-3 py-2 text-xs text-cream placeholder:text-muted-foreground/60 outline-none focus:border-gold"
               />
               <button
                 type="submit"
                 disabled={sending || input.trim().length === 0}
-                aria-label="Invia messaggio"
+                aria-label={t.chat.sendAria}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-gold text-obsidian transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
               >
                 <Send className="h-3.5 w-3.5" />
@@ -196,7 +194,7 @@ export function ChatWidget({ aiEnabled }: ChatWidgetProps) {
       <button
         type="button"
         onClick={toggle}
-        aria-label={isOpen ? "Chiudi l'assistente" : "Apri l'assistente"}
+        aria-label={isOpen ? t.chat.closeAssistantAria : t.chat.openAria}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-gold text-obsidian shadow-lg transition-transform hover:scale-105 cursor-pointer"
       >
         {isOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-6 w-6" />}

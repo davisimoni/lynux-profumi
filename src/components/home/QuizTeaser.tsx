@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { ProductArt } from "@/components/product/ProductArt";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function QuizTeaser() {
+  const { t } = useTranslation();
+
   return (
     <section className="border-b border-border">
       <Link
@@ -17,17 +22,14 @@ export function QuizTeaser() {
         <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-5 px-4 py-20 sm:px-6 lg:px-8">
           <span className="flex items-center gap-2 text-xs uppercase tracking-luxe text-gold">
             <Sparkles className="h-4 w-4" />
-            Scent Discovery Quiz
+            {t.quizTeaser.eyebrow}
           </span>
           <h2 className="max-w-lg font-display text-3xl font-semibold leading-tight text-cream sm:text-4xl">
-            Non sai quale fragranza scegliere?
+            {t.quizTeaser.title}
           </h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Tre domande. Un profumo. Lascia che il tuo carattere olfattivo ti guidi verso la
-            fragranza Lynux pensata per te.
-          </p>
+          <p className="max-w-md text-sm text-muted-foreground">{t.quizTeaser.subtitle}</p>
           <span className="mt-2 flex items-center gap-2 text-xs uppercase tracking-luxe text-cream transition-colors group-hover:text-gold">
-            Inizia il Quiz
+            {t.quizTeaser.cta}
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </span>
         </div>

@@ -18,6 +18,7 @@ const assistantRequestSchema = z.object({
     )
     .min(1)
     .max(30),
+  locale: z.enum(["it", "en"]).default("it"),
 });
 
 export async function POST(request: Request) {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  const { messages } = parsed.data;
+  const { messages, locale } = parsed.data;
   const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
 
   if (!lastUserMessage) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
   }
 
   if (!isAnthropicConfigured) {
-    const reply = getLocalResponse(lastUserMessage.content);
+    const reply = getLocalResponse(lastUserMessage.content, locale);
     return NextResponse.json({ mode: "local" as const, reply });
   }
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     const response = await client.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 400,
-      system: buildKnowledgeBaseText(),
+      system: buildKnowledgeBaseText(locale),
       messages: messages.map((message) => ({ role: message.role, content: message.content })),
     });
 
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     telemetry.error("assistant.claude_failed", "Chiamata a Claude fallita, uso il fallback locale", {
       message: error instanceof Error ? error.message : "unknown",
     });
-    const reply = getLocalResponse(lastUserMessage.content);
+    const reply = getLocalResponse(lastUserMessage.content, locale);
     return NextResponse.json({ mode: "local" as const, reply });
   }
 }

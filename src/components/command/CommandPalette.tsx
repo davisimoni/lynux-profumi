@@ -16,6 +16,7 @@ import {
 import { buildSearchIndex, type SearchItem, type SearchItemType } from "@/lib/search-index";
 import { products } from "@/data/products";
 import { useCommandPaletteStore } from "@/store/command-palette";
+import { useTranslation } from "@/hooks/use-translation";
 
 const TYPE_ICON: Record<SearchItemType, typeof Package> = {
   product: Package,
@@ -24,49 +25,52 @@ const TYPE_ICON: Record<SearchItemType, typeof Package> = {
   page: ArrowRight,
 };
 
-const TYPE_HEADING: Record<SearchItemType, string> = {
-  product: "Fragranze",
-  family: "Famiglie Olfattive",
-  note: "Note Olfattive",
-  page: "Naviga",
-};
-
 const TYPE_ORDER: SearchItemType[] = ["product", "family", "note", "page"];
 const GROUP_LIMIT: Record<SearchItemType, number> = { product: 6, family: 5, note: 6, page: 6 };
-
-const SEARCH_INDEX = buildSearchIndex();
-
-const fuse = new Fuse(SEARCH_INDEX, {
-  keys: [
-    { name: "title", weight: 0.7 },
-    { name: "subtitle", weight: 0.3 },
-  ],
-  threshold: 0.38,
-  ignoreLocation: true,
-  minMatchCharLength: 2,
-});
-
-const DEFAULT_RESULTS: SearchItem[] = [
-  ...products
-    .filter((product) => product.bestseller)
-    .map(
-      (product): SearchItem => ({
-        type: "product",
-        id: `product-${product.id}`,
-        title: product.name,
-        subtitle: `${product.family} · ${product.concentration}`,
-        href: `/product/${product.slug}`,
-        accent: product.accent,
-      }),
-    ),
-  ...SEARCH_INDEX.filter((item) => item.type === "page"),
-];
 
 export function CommandPalette() {
   const router = useRouter();
   const isOpen = useCommandPaletteStore((state) => state.isOpen);
   const close = useCommandPaletteStore((state) => state.close);
   const [query, setQuery] = useState("");
+  const { locale, t } = useTranslation();
+
+  const TYPE_HEADING: Record<SearchItemType, string> = t.commandPalette.groupHeadings;
+
+  const searchIndex = useMemo(() => buildSearchIndex(t, locale), [t, locale]);
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(searchIndex, {
+        keys: [
+          { name: "title", weight: 0.7 },
+          { name: "subtitle", weight: 0.3 },
+        ],
+        threshold: 0.38,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      }),
+    [searchIndex],
+  );
+
+  const defaultResults = useMemo<SearchItem[]>(
+    () => [
+      ...products
+        .filter((product) => product.bestseller)
+        .map(
+          (product): SearchItem => ({
+            type: "product",
+            id: `product-${product.id}`,
+            title: product.name,
+            subtitle: `${t.families[product.family]} · ${t.concentrations[product.concentration]}`,
+            href: `/product/${product.slug}`,
+            accent: product.accent,
+          }),
+        ),
+      ...searchIndex.filter((item) => item.type === "page"),
+    ],
+    [searchIndex, t],
+  );
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -86,12 +90,12 @@ export function CommandPalette() {
 
   const results = useMemo(() => {
     const trimmed = query.trim();
-    if (trimmed.length === 0) return DEFAULT_RESULTS;
+    if (trimmed.length === 0) return defaultResults;
     return fuse
       .search(trimmed)
       .map((match) => match.item)
       .slice(0, 30);
-  }, [query]);
+  }, [query, fuse, defaultResults]);
 
   const groups = useMemo(() => {
     const buckets = new Map<SearchItemType, SearchItem[]>();
@@ -115,19 +119,19 @@ export function CommandPalette() {
     <CommandDialog
       open={isOpen}
       onOpenChange={(next) => (next ? undefined : handleClose())}
-      title="Ricerca Lynux"
-      description="Cerca fragranze, note olfattive, famiglie e pagine"
+      title={t.commandPalette.title}
+      description={t.commandPalette.description}
       className="border border-border bg-obsidian-raised"
     >
       <Command shouldFilter={false} className="bg-transparent">
         <CommandInput
           value={query}
           onValueChange={setQuery}
-          placeholder="Cerca una fragranza, una nota, una famiglia olfattiva…"
+          placeholder={t.commandPalette.placeholder}
         />
         <CommandList>
           <CommandEmpty className="py-10 text-center text-sm text-muted-foreground">
-            Nessun risultato per &ldquo;{query}&rdquo;.
+            {t.commandPalette.noResults(query)}
           </CommandEmpty>
 
           {groups.map(({ type, items }) => (
@@ -151,9 +155,9 @@ export function CommandPalette() {
         </CommandList>
 
         <div className="flex items-center justify-end gap-4 border-t border-border px-3 py-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-          <span>↑↓ Naviga</span>
-          <span>↵ Seleziona</span>
-          <span>Esc Chiudi</span>
+          <span>{t.commandPalette.navigate}</span>
+          <span>{t.commandPalette.select}</span>
+          <span>{t.commandPalette.close}</span>
         </div>
       </Command>
     </CommandDialog>

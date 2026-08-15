@@ -19,14 +19,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useTranslation } from "@/hooks/use-translation";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 
 type SortOption = "popularity" | "price-asc" | "price-desc";
-
-const SORT_LABELS: Record<SortOption, string> = {
-  popularity: "Popolarità",
-  "price-asc": "Prezzo: crescente",
-  "price-desc": "Prezzo: decrescente",
-};
 
 function toggleValue<T>(set: Set<T>, value: T): Set<T> {
   const next = new Set(set);
@@ -43,6 +39,7 @@ function referencePrice(product: Product): number {
 }
 
 interface FilterGroupsProps {
+  t: Dictionary;
   families: Set<Product["family"]>;
   selectedGenders: Set<Product["gender"]>;
   selectedConcentrations: Set<Product["concentration"]>;
@@ -54,6 +51,7 @@ interface FilterGroupsProps {
 }
 
 function FilterGroups({
+  t,
   families,
   selectedGenders,
   selectedConcentrations,
@@ -67,7 +65,7 @@ function FilterGroups({
     <div className="space-y-8">
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-xs uppercase tracking-luxe text-gold">Famiglia Olfattiva</p>
+          <p className="text-xs uppercase tracking-luxe text-gold">{t.catalog.familyLabel}</p>
         </div>
         <div className="space-y-2.5">
           {olfactoryFamilies.map((family) => (
@@ -79,14 +77,14 @@ function FilterGroups({
                 checked={families.has(family)}
                 onCheckedChange={() => onToggleFamily(family)}
               />
-              {family}
+              {t.families[family]}
             </label>
           ))}
         </div>
       </div>
 
       <div>
-        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Genere</p>
+        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.catalog.genderLabel}</p>
         <div className="space-y-2.5">
           {genders.map((gender) => (
             <label
@@ -97,14 +95,14 @@ function FilterGroups({
                 checked={selectedGenders.has(gender)}
                 onCheckedChange={() => onToggleGender(gender)}
               />
-              {gender}
+              {t.genders[gender]}
             </label>
           ))}
         </div>
       </div>
 
       <div>
-        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">Concentrazione</p>
+        <p className="mb-3 text-xs uppercase tracking-luxe text-gold">{t.catalog.concentrationLabel}</p>
         <div className="space-y-2.5">
           {concentrations.map((concentration) => (
             <label
@@ -115,7 +113,7 @@ function FilterGroups({
                 checked={selectedConcentrations.has(concentration)}
                 onCheckedChange={() => onToggleConcentration(concentration)}
               />
-              {concentration}
+              {t.concentrations[concentration]}
             </label>
           ))}
         </div>
@@ -127,7 +125,7 @@ function FilterGroups({
           onClick={onReset}
           className="text-xs uppercase tracking-wide text-muted-foreground underline underline-offset-4 hover:text-gold cursor-pointer"
         >
-          Azzera filtri
+          {t.catalog.resetFilters}
         </button>
       )}
     </div>
@@ -135,6 +133,7 @@ function FilterGroups({
 }
 
 export function CatalogClient() {
+  const { t } = useTranslation();
   const [families, setFamilies] = useState<Set<Product["family"]>>(new Set());
   const [selectedGenders, setSelectedGenders] = useState<Set<Product["gender"]>>(new Set());
   const [selectedConcentrations, setSelectedConcentrations] = useState<
@@ -179,6 +178,7 @@ export function CatalogClient() {
   }, [families, selectedGenders, selectedConcentrations, sort]);
 
   const filterProps: FilterGroupsProps = {
+    t,
     families,
     selectedGenders,
     selectedConcentrations,
@@ -197,8 +197,8 @@ export function CatalogClient() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 flex flex-col gap-3 border-b border-border pb-8 text-center">
-        <p className="text-xs uppercase tracking-luxe text-gold">La Collezione</p>
-        <h1 className="font-display text-4xl font-semibold text-cream">Catalogo Fragranze</h1>
+        <p className="text-xs uppercase tracking-luxe text-gold">{t.catalog.eyebrow}</p>
+        <h1 className="font-display text-4xl font-semibold text-cream">{t.catalog.title}</h1>
       </div>
 
       <div className="flex flex-col gap-10 lg:flex-row">
@@ -208,10 +208,7 @@ export function CatalogClient() {
 
         <div className="flex-1">
           <div className="mb-6 flex items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              {filteredProducts.length}{" "}
-              {filteredProducts.length === 1 ? "fragranza" : "fragranze"}
-            </p>
+            <p className="text-sm text-muted-foreground">{t.catalog.count(filteredProducts.length)}</p>
 
             <div className="flex items-center gap-2">
               <button
@@ -220,7 +217,7 @@ export function CatalogClient() {
                 className="flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs uppercase tracking-wide text-cream hover:border-gold hover:text-gold lg:hidden cursor-pointer"
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
-                Filtri
+                {t.catalog.filtersButton}
               </button>
 
               <Select value={sort} onValueChange={(value) => setSort(value as SortOption)}>
@@ -228,9 +225,9 @@ export function CatalogClient() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(SORT_LABELS) as SortOption[]).map((option) => (
+                  {(Object.keys(t.catalog.sortLabels) as SortOption[]).map((option) => (
                     <SelectItem key={option} value={option}>
-                      {SORT_LABELS[option]}
+                      {t.catalog.sortLabels[option]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -240,13 +237,13 @@ export function CatalogClient() {
 
           {filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-border py-24 text-center">
-              <p className="text-cream">Nessuna fragranza corrisponde ai filtri selezionati.</p>
+              <p className="text-cream">{t.catalog.noResults}</p>
               <button
                 type="button"
                 onClick={filterProps.onReset}
                 className="text-xs uppercase tracking-wide text-gold underline underline-offset-4 cursor-pointer"
               >
-                Azzera filtri
+                {t.catalog.resetFilters}
               </button>
             </div>
           ) : (
@@ -262,7 +259,7 @@ export function CatalogClient() {
       <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <SheetContent side="left" className="border-border bg-obsidian-raised">
           <SheetHeader className="border-b border-border">
-            <SheetTitle className="font-display text-lg text-cream">Filtri</SheetTitle>
+            <SheetTitle className="font-display text-lg text-cream">{t.catalog.filtersTitle}</SheetTitle>
           </SheetHeader>
           <div className="overflow-y-auto px-4 pb-6">
             <FilterGroups {...filterProps} />

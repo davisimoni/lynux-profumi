@@ -13,6 +13,7 @@ import { ProductArt } from "@/components/product/ProductArt";
 import { Separator } from "@/components/ui/separator";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { useMoney } from "@/hooks/use-money";
+import { useTranslation } from "@/hooks/use-translation";
 import {
   cartShipping,
   cartSubtotal,
@@ -26,6 +27,7 @@ export function CartDrawer() {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const money = useMoney();
+  const { t } = useTranslation();
 
   const subtotal = cartSubtotal(items);
   const shipping = cartShipping(subtotal);
@@ -37,22 +39,20 @@ export function CartDrawer() {
       <SheetContent side="right" className="border-border bg-obsidian-raised p-0">
         <SheetHeader className="border-b border-border">
           <SheetTitle className="font-display text-xl tracking-wide text-cream">
-            Il tuo Carrello
+            {t.cart.title}
           </SheetTitle>
         </SheetHeader>
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <ShoppingBag className="h-10 w-10 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Il tuo carrello è vuoto. Lascia che una fragranza ti trovi.
-            </p>
+            <p className="text-sm text-muted-foreground">{t.cart.empty}</p>
             <Link
               href="/catalog"
               onClick={closeCart}
               className="rounded-sm border border-gold px-5 py-2.5 text-xs uppercase tracking-luxe text-gold transition-colors hover:bg-gold hover:text-obsidian"
             >
-              Esplora le Fragranze
+              {t.cart.emptyCta}
             </Link>
           </div>
         ) : (
@@ -68,12 +68,11 @@ export function CartDrawer() {
                 <p className="text-xs text-muted-foreground">
                   {remaining > 0 ? (
                     <>
-                      Ti mancano{" "}
-                      <span className="text-gold">{money(remaining)}</span> per la
-                      spedizione gratuita
+                      {t.cart.remainingPrefix}{" "}
+                      <span className="text-gold">{money(remaining)}</span> {t.cart.remainingSuffix}
                     </>
                   ) : (
-                    <span className="text-gold">Spedizione gratuita sbloccata</span>
+                    <span className="text-gold">{t.cart.freeUnlocked}</span>
                   )}
                 </p>
               </div>
@@ -96,7 +95,7 @@ export function CartDrawer() {
                         <div className="flex items-center gap-2 rounded-sm border border-border">
                           <button
                             type="button"
-                            aria-label="Diminuisci quantità"
+                            aria-label={t.cart.decreaseAria}
                             className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-gold cursor-pointer"
                             onClick={() =>
                               updateQuantity(item.productId, item.sizeLabel, item.quantity - 1)
@@ -109,7 +108,7 @@ export function CartDrawer() {
                           </span>
                           <button
                             type="button"
-                            aria-label="Aumenta quantità"
+                            aria-label={t.cart.increaseAria}
                             className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-gold cursor-pointer"
                             onClick={() =>
                               updateQuantity(item.productId, item.sizeLabel, item.quantity + 1)
@@ -125,7 +124,7 @@ export function CartDrawer() {
                     </div>
                     <button
                       type="button"
-                      aria-label="Rimuovi articolo"
+                      aria-label={t.cart.removeAria}
                       onClick={() => removeItem(item.productId, item.sizeLabel)}
                       className="self-start text-muted-foreground transition-colors hover:text-destructive cursor-pointer"
                     >
@@ -138,18 +137,18 @@ export function CartDrawer() {
 
             <SheetFooter className="border-t border-border">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Subtotale</span>
+                <span className="text-muted-foreground">{t.cart.subtotal}</span>
                 <span className="text-cream">{money(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Spedizione</span>
+                <span className="text-muted-foreground">{t.cart.shipping}</span>
                 <span className="text-cream">
-                  {shipping === 0 ? "Gratuita" : money(shipping)}
+                  {shipping === 0 ? t.cart.free : money(shipping)}
                 </span>
               </div>
               <Separator className="my-1" />
               <div className="flex items-center justify-between">
-                <span className="font-display text-base text-cream">Totale</span>
+                <span className="font-display text-base text-cream">{t.cart.total}</span>
                 <span className="font-display text-lg text-gold">
                   {money(subtotal + shipping)}
                 </span>
@@ -159,14 +158,14 @@ export function CartDrawer() {
                 onClick={closeCart}
                 className="mt-2 flex w-full items-center justify-center rounded-sm bg-gold py-3 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90"
               >
-                Vai al Checkout
+                {t.cart.checkout}
               </Link>
               <button
                 type="button"
                 onClick={closeCart}
                 className="w-full py-2 text-center text-xs uppercase tracking-wide text-muted-foreground hover:text-cream cursor-pointer"
               >
-                Continua lo shopping
+                {t.cart.continueShopping}
               </button>
             </SheetFooter>
           </>

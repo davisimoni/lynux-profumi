@@ -15,7 +15,9 @@ import { useCurrencyStore } from "@/store/currency";
 import { useHasMounted } from "@/hooks/use-has-mounted";
 import { useMoney } from "@/hooks/use-money";
 import { useStockReservation } from "@/hooks/use-stock-reservation";
+import { useTranslation } from "@/hooks/use-translation";
 import { telemetry } from "@/lib/telemetry";
+import { COUNTRY_VALUES } from "@/lib/constants";
 
 function formatCountdown(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -30,7 +32,7 @@ const EMPTY_ADDRESS: ShippingAddress = {
   city: "",
   postalCode: "",
   province: "",
-  country: "Italia",
+  country: COUNTRY_VALUES[0],
   phone: "",
   email: "",
 };
@@ -54,6 +56,7 @@ export function CheckoutForm() {
   const currency = useCurrencyStore((state) => state.currency);
   const money = useMoney();
   const reservation = useStockReservation(items);
+  const { t } = useTranslation();
 
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
@@ -93,11 +96,11 @@ export function CheckoutForm() {
         if (data.mode === "stripe" && data.clientSecret) {
           setCheckoutSession(data);
         } else {
-          toast.error("Impossibile inizializzare il pagamento Stripe. Riprova tra poco.");
+          toast.error(t.checkout.errors.stripeInitFailed);
         }
       })
       .catch(() => {
-        if (!cancelled) toast.error("Errore di rete durante l'inizializzazione del pagamento.");
+        if (!cancelled) toast.error(t.checkout.errors.networkInit);
       })
       .finally(() => {
         if (!cancelled) setSessionLoading(false);
@@ -155,7 +158,7 @@ export function CheckoutForm() {
     }
 
     if (reservation.expired) {
-      toast.error("La tua prenotazione di magazzino è scaduta. Aggiorna la pagina per riprovare.");
+      toast.error(t.checkout.errors.reservationExpiredToast);
       telemetry.warn("checkout.submit_blocked_expired_reservation", "Submit bloccato: prenotazione scaduta");
       return;
     }
@@ -165,7 +168,7 @@ export function CheckoutForm() {
     try {
       if (useRealStripe) {
         if (!checkoutSession || checkoutSession.mode !== "stripe" || !stripeApiRef.current) {
-          toast.error("Il modulo di pagamento non è ancora pronto. Attendi un istante e riprova.");
+          toast.error(t.checkout.errors.paymentFormNotReady);
           return;
         }
 
@@ -176,14 +179,14 @@ export function CheckoutForm() {
         });
 
         if (error) {
-          toast.error(error.message ?? "Pagamento non riuscito. Controlla i dati della carta.");
+          toast.error(error.message ?? t.checkout.errors.paymentFailed);
           telemetry.error("checkout.stripe_confirm_failed", error.message ?? "Pagamento non riuscito", {
             code: error.code,
           });
           return;
         }
         if (!paymentIntent || paymentIntent.status !== "succeeded") {
-          toast.error("Il pagamento non è stato completato.");
+          toast.error(t.checkout.errors.paymentIncomplete);
           telemetry.error("checkout.stripe_incomplete", "PaymentIntent non risulta succeeded", {
             status: paymentIntent?.status,
           });
@@ -204,7 +207,7 @@ export function CheckoutForm() {
         });
 
         if (!confirmResponse.ok) {
-          toast.error("Pagamento riuscito, ma la registrazione dell'ordine è fallita. Contattaci.");
+          toast.error(t.checkout.errors.orderRegistrationFailed);
           telemetry.error("checkout.confirm_persist_failed", "Pagamento riuscito ma /api/checkout/confirm ha fallito", {
             orderNumber: checkoutSession.orderNumber,
             status: confirmResponse.status,
@@ -224,7 +227,7 @@ export function CheckoutForm() {
       });
 
       if (!response.ok) {
-        toast.error("Non è stato possibile completare l'ordine. Riprova.");
+        toast.error(t.checkout.errors.orderFailed);
         telemetry.error("checkout.demo_order_failed", "/api/checkout ha risposto con errore", {
           status: response.status,
         });
@@ -234,7 +237,7 @@ export function CheckoutForm() {
       const data = await response.json();
       finalizeOrder(data.orderNumber, data.subtotal, data.shipping, data.total);
     } catch (error) {
-      toast.error("Errore di rete. Controlla la connessione e riprova.");
+      toast.error(t.checkout.errors.network);
       telemetry.error("checkout.network_error", error instanceof Error ? error.message : "Errore sconosciuto");
     } finally {
       setSubmitting(false);
@@ -248,15 +251,13 @@ export function CheckoutForm() {
   if (items.length === 0) {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center gap-4 px-4 py-24 text-center sm:px-6">
-        <p className="font-display text-2xl text-cream">Il tuo carrello è vuoto</p>
-        <p className="text-sm text-muted-foreground">
-          Aggiungi una fragranza alla tua selezione prima di procedere al checkout.
-        </p>
+        <p className="font-display text-2xl text-cream">{t.checkout.emptyCart}</p>
+        <p className="text-sm text-muted-foreground">{t.checkout.emptyCartDescription}</p>
         <Link
           href="/catalog"
           className="mt-2 rounded-sm border border-gold px-6 py-3 text-xs uppercase tracking-luxe text-gold transition-colors hover:bg-gold hover:text-obsidian"
         >
-          Esplora le Fragranze
+          {t.checkout.exploreCta}
         </Link>
       </div>
     );
@@ -271,17 +272,17 @@ export function CheckoutForm() {
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
-        <p className="text-xs uppercase tracking-luxe text-gold">Checkout</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold text-cream">Completa il tuo Ordine</h1>
+        <p className="text-xs uppercase tracking-luxe text-gold">{t.checkout.eyebrow}</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold text-cream">{t.checkout.title}</h1>
       </div>
 
       <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
         <div className="space-y-10">
           <section>
-            <h2 className="mb-4 font-display text-xl text-cream">Contatto</h2>
+            <h2 className="mb-4 font-display text-xl text-cream">{t.checkout.contactSection}</h2>
             <div>
               <label className={labelClass} htmlFor="email">
-                Email
+                {t.checkout.email}
               </label>
               <input
                 id="email"
@@ -296,11 +297,11 @@ export function CheckoutForm() {
           </section>
 
           <section>
-            <h2 className="mb-4 font-display text-xl text-cream">Indirizzo di Spedizione</h2>
+            <h2 className="mb-4 font-display text-xl text-cream">{t.checkout.addressSection}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass} htmlFor="firstName">
-                  Nome
+                  {t.checkout.firstName}
                 </label>
                 <input
                   id="firstName"
@@ -312,7 +313,7 @@ export function CheckoutForm() {
               </div>
               <div>
                 <label className={labelClass} htmlFor="lastName">
-                  Cognome
+                  {t.checkout.lastName}
                 </label>
                 <input
                   id="lastName"
@@ -324,7 +325,7 @@ export function CheckoutForm() {
               </div>
               <div className="sm:col-span-2">
                 <label className={labelClass} htmlFor="address">
-                  Indirizzo
+                  {t.checkout.address}
                 </label>
                 <input
                   id="address"
@@ -332,12 +333,12 @@ export function CheckoutForm() {
                   value={address.address}
                   onChange={(e) => updateField("address", e.target.value)}
                   className={inputClass}
-                  placeholder="Via, numero civico"
+                  placeholder={t.checkout.addressPlaceholder}
                 />
               </div>
               <div>
                 <label className={labelClass} htmlFor="city">
-                  Città
+                  {t.checkout.city}
                 </label>
                 <input
                   id="city"
@@ -349,7 +350,7 @@ export function CheckoutForm() {
               </div>
               <div>
                 <label className={labelClass} htmlFor="postalCode">
-                  CAP
+                  {t.checkout.postalCode}
                 </label>
                 <input
                   id="postalCode"
@@ -361,7 +362,7 @@ export function CheckoutForm() {
               </div>
               <div>
                 <label className={labelClass} htmlFor="province">
-                  Provincia
+                  {t.checkout.province}
                 </label>
                 <input
                   id="province"
@@ -369,12 +370,12 @@ export function CheckoutForm() {
                   value={address.province}
                   onChange={(e) => updateField("province", e.target.value)}
                   className={inputClass}
-                  placeholder="es. MI"
+                  placeholder={t.checkout.provincePlaceholder}
                 />
               </div>
               <div>
                 <label className={labelClass} htmlFor="country">
-                  Paese
+                  {t.checkout.country}
                 </label>
                 <select
                   id="country"
@@ -383,15 +384,16 @@ export function CheckoutForm() {
                   onChange={(e) => updateField("country", e.target.value)}
                   className={inputClass}
                 >
-                  <option>Italia</option>
-                  <option>San Marino</option>
-                  <option>Svizzera</option>
-                  <option>Città del Vaticano</option>
+                  {COUNTRY_VALUES.map((value, index) => (
+                    <option key={value} value={value}>
+                      {t.checkout.countries[index]}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="sm:col-span-2">
                 <label className={labelClass} htmlFor="phone">
-                  Telefono
+                  {t.checkout.phone}
                 </label>
                 <input
                   id="phone"
@@ -407,7 +409,7 @@ export function CheckoutForm() {
           </section>
 
           <section>
-            <h2 className="mb-4 font-display text-xl text-cream">Metodo di Pagamento</h2>
+            <h2 className="mb-4 font-display text-xl text-cream">{t.checkout.paymentSection}</h2>
             <RadioGroup
               value={paymentMethod}
               onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
@@ -420,7 +422,7 @@ export function CheckoutForm() {
               >
                 <RadioGroupItem value="card" />
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-cream">Carta di Credito</span>
+                <span className="text-sm text-cream">{t.checkout.creditCard}</span>
                 {isStripeEnabledClient && (
                   <span className="ml-auto flex items-center gap-1 text-[10px] uppercase tracking-wide text-gold">
                     <ShieldCheck className="h-3 w-3" />
@@ -435,7 +437,7 @@ export function CheckoutForm() {
               >
                 <RadioGroupItem value="apple-pay" />
                 <Wallet className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-cream">Apple Pay</span>
+                <span className="text-sm text-cream">{t.checkout.applePay}</span>
               </label>
               <label
                 className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3.5 transition-colors ${
@@ -444,7 +446,7 @@ export function CheckoutForm() {
               >
                 <RadioGroupItem value="paypal" />
                 <Wallet className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-cream">PayPal</span>
+                <span className="text-sm text-cream">{t.checkout.paypal}</span>
               </label>
             </RadioGroup>
 
@@ -458,22 +460,15 @@ export function CheckoutForm() {
                 ) : (
                   <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Preparazione del modulo di pagamento sicuro…
+                    {t.checkout.stripePreparing}
                   </div>
                 )}
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Pagamento elaborato da Stripe in modalità Test (Sandbox). Usa la carta{" "}
-                  <span className="text-cream">4242 4242 4242 4242</span>, una data futura e un CVC
-                  qualsiasi — nessun addebito reale verrà effettuato.
-                </p>
+                <p className="mt-4 text-xs text-muted-foreground">{t.checkout.stripeTestNote}</p>
               </div>
             ) : (
               paymentMethod === "card" && (
                 <div className="mt-4 rounded-sm border border-border p-4">
-                  <p className="text-xs text-muted-foreground">
-                    Simulazione di pagamento — nessun dato reale viene elaborato o memorizzato.
-                    Collega una chiave Stripe di test per abilitare il modulo di pagamento reale.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t.checkout.demoPaymentNote}</p>
                 </div>
               )
             )}
@@ -481,7 +476,7 @@ export function CheckoutForm() {
         </div>
 
         <div className="h-fit rounded-md border border-border bg-card p-6">
-          <h2 className="mb-5 font-display text-xl text-cream">Riepilogo Ordine</h2>
+          <h2 className="mb-5 font-display text-xl text-cream">{t.checkout.orderSummary}</h2>
           <ul className="space-y-4">
             {items.map((item) => (
               <li key={`${item.productId}-${item.sizeLabel}`} className="flex justify-between gap-3 text-sm">
@@ -502,15 +497,15 @@ export function CheckoutForm() {
 
           <div className="space-y-2.5 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotale</span>
+              <span className="text-muted-foreground">{t.checkout.subtotal}</span>
               <span className="text-cream">{money(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Spedizione</span>
-              <span className="text-cream">{shipping === 0 ? "Gratuita" : money(shipping)}</span>
+              <span className="text-muted-foreground">{t.checkout.shipping}</span>
+              <span className="text-cream">{shipping === 0 ? t.checkout.free : money(shipping)}</span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground/70">
-              <span>di cui IVA (22%)</span>
+              <span>{t.checkout.vatIncluded}</span>
               <span>{money(vatIncluded)}</span>
             </div>
           </div>
@@ -518,23 +513,21 @@ export function CheckoutForm() {
           <Separator className="my-5" />
 
           <div className="flex items-center justify-between">
-            <span className="font-display text-lg text-cream">Totale</span>
+            <span className="font-display text-lg text-cream">{t.checkout.total}</span>
             <span className="font-display text-2xl text-gold">{money(total)}</span>
           </div>
 
           {reservation.insufficientStock && (
             <div className="mt-4 flex items-center gap-2 rounded-sm border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
               <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
-              Disponibilità insufficiente per un articolo nel carrello (rimasti:{" "}
-              {reservation.insufficientStock.available}). Aggiorna il carrello per continuare.
+              {t.checkout.insufficientStock(reservation.insufficientStock.available)}
             </div>
           )}
 
           {!reservation.insufficientStock && reservation.expired && (
             <div className="mt-4 flex items-center gap-2 rounded-sm border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
               <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
-              La tua prenotazione di magazzino è scaduta. Aggiorna la pagina per riservare di nuovo
-              lo stock.
+              {t.checkout.reservationExpired}
             </div>
           )}
 
@@ -547,7 +540,7 @@ export function CheckoutForm() {
               }`}
             >
               <TimerReset className="h-3.5 w-3.5" />
-              Riservato per te: {formatCountdown(reservation.remainingSeconds)}
+              {t.checkout.reservedFor} {formatCountdown(reservation.remainingSeconds)}
             </div>
           )}
 
@@ -559,18 +552,16 @@ export function CheckoutForm() {
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Elaborazione
+                {t.checkout.processing}
               </>
             ) : useRealStripe ? (
-              `Paga ${money(total)}`
+              t.checkout.payButton(money(total))
             ) : (
-              "Conferma Ordine Demo"
+              t.checkout.confirmDemoOrder
             )}
           </button>
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            {useRealStripe
-              ? "Transazione in modalità Test Stripe — nessun pagamento reale verrà effettuato."
-              : "Ordine dimostrativo a scopo di portfolio. Nessun pagamento reale verrà effettuato."}
+            {useRealStripe ? t.checkout.stripeDisclaimer : t.checkout.demoDisclaimer}
           </p>
         </div>
       </div>

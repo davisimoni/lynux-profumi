@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Lock, KeyRound, LayoutDashboard } from "lucide-react";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { useTranslation } from "@/hooks/use-translation";
 
 const STORAGE_KEY = "lynux-admin-code";
 
@@ -11,6 +12,7 @@ interface AdminGateProps {
 }
 
 export function AdminGate({ gateConfigured }: AdminGateProps) {
+  const { t } = useTranslation();
   const [restoring, setRestoring] = useState(gateConfigured);
   const [adminCode, setAdminCode] = useState<string | null>(null);
   const [codeInput, setCodeInput] = useState("");
@@ -44,14 +46,14 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
       });
 
       if (!response.ok) {
-        setError("Codice non valido.");
+        setError(t.admin.invalidCode);
         return;
       }
 
       sessionStorage.setItem(STORAGE_KEY, codeInput);
       setAdminCode(codeInput);
     } catch {
-      setError("Errore di rete. Riprova.");
+      setError(t.admin.networkError);
     } finally {
       setChecking(false);
     }
@@ -71,12 +73,10 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
         <LayoutDashboard className="h-6 w-6" />
       </div>
       <div>
-        <p className="text-xs uppercase tracking-luxe text-gold">Area Riservata</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-cream">Admin Dashboard</h1>
+        <p className="text-xs uppercase tracking-luxe text-gold">{t.admin.restrictedArea}</p>
+        <h1 className="mt-2 font-display text-3xl font-semibold text-cream">{t.admin.title}</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          {gateConfigured
-            ? "Inserisci il codice di accesso per consultare fatturato, ordini e inventario."
-            : "Modalità demo di portfolio: nessuna autenticazione reale è richiesta."}
+          {gateConfigured ? t.admin.gateDescription : t.admin.demoDescription}
         </p>
       </div>
 
@@ -88,7 +88,7 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
               type="password"
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value)}
-              placeholder="Codice di accesso"
+              placeholder={t.admin.codePlaceholder}
               className="w-full rounded-sm border border-border bg-transparent py-2.5 pl-10 pr-3.5 text-sm text-cream outline-none transition-colors focus:border-gold"
             />
           </div>
@@ -99,7 +99,7 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
             className="flex items-center justify-center gap-2 rounded-sm bg-gold py-3 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
           >
             <Lock className="h-3.5 w-3.5" />
-            Sblocca Dashboard
+            {t.admin.unlock}
           </button>
         </form>
       ) : (
@@ -109,7 +109,7 @@ export function AdminGate({ gateConfigured }: AdminGateProps) {
           className="flex items-center gap-2 rounded-sm bg-gold px-8 py-3.5 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 cursor-pointer"
         >
           <LayoutDashboard className="h-4 w-4" />
-          Accedi alla Dashboard Demo
+          {t.admin.accessDemoDashboard}
         </button>
       )}
     </div>

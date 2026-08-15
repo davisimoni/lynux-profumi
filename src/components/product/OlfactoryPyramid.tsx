@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { OlfactoryNotes } from "@/types/product";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Tier {
   key: keyof OlfactoryNotes;
@@ -11,12 +12,6 @@ interface Tier {
   subtitle: string;
   widthClass: string;
 }
-
-const TIERS: Tier[] = [
-  { key: "top", label: "Note di Testa", subtitle: "I primi 15 minuti", widthClass: "w-[46%]" },
-  { key: "heart", label: "Note di Cuore", subtitle: "Da 15 minuti a 2 ore", widthClass: "w-[72%]" },
-  { key: "base", label: "Note di Fondo", subtitle: "Oltre le 2 ore", widthClass: "w-[98%]" },
-];
 
 const containerVariants: Variants = {
   hidden: {},
@@ -51,13 +46,19 @@ interface OlfactoryPyramidProps {
 }
 
 export function OlfactoryPyramid({ notes }: OlfactoryPyramidProps) {
+  const { t } = useTranslation();
+  const TIERS: Tier[] = [
+    { key: "top", label: t.product.pyramid.tiers.top.label, subtitle: t.product.pyramid.tiers.top.subtitle, widthClass: "w-[46%]" },
+    { key: "heart", label: t.product.pyramid.tiers.heart.label, subtitle: t.product.pyramid.tiers.heart.subtitle, widthClass: "w-[72%]" },
+    { key: "base", label: t.product.pyramid.tiers.base.label, subtitle: t.product.pyramid.tiers.base.subtitle, widthClass: "w-[98%]" },
+  ];
   const [selected, setSelected] = useState<Tier["key"]>("heart");
   const activeTier = TIERS.find((tier) => tier.key === selected) ?? TIERS[1];
 
   return (
     <div className="rounded-md border border-border bg-card p-6 sm:p-8">
       <p className="mb-6 text-xs uppercase tracking-luxe text-gold">
-        Piramide Olfattiva Interattiva
+        {t.product.pyramid.title}
       </p>
 
       <motion.div

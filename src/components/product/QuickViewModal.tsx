@@ -11,18 +11,22 @@ import { cn } from "@/lib/utils";
 import { useMoney } from "@/hooks/use-money";
 import { useCartStore } from "@/store/cart";
 import { useQuickViewStore } from "@/store/quick-view";
-
-const PYRAMID_ROWS = [
-  { key: "top" as const, label: "Testa" },
-  { key: "heart" as const, label: "Cuore" },
-  { key: "base" as const, label: "Fondo" },
-];
+import { useTranslation } from "@/hooks/use-translation";
+import { localizeProduct } from "@/lib/i18n/localize-product";
 
 export function QuickViewModal() {
-  const product = useQuickViewStore((state) => state.product);
+  const rawProduct = useQuickViewStore((state) => state.product);
   const close = useQuickViewStore((state) => state.close);
   const addItem = useCartStore((state) => state.addItem);
   const money = useMoney();
+  const { locale, t } = useTranslation();
+  const product = rawProduct ? localizeProduct(rawProduct, locale) : null;
+
+  const PYRAMID_ROWS = [
+    { key: "top" as const, label: t.product.pyramid.tiers.top.label },
+    { key: "heart" as const, label: t.product.pyramid.tiers.heart.label },
+    { key: "base" as const, label: t.product.pyramid.tiers.base.label },
+  ];
 
   const purchasableSizes = product?.sizes.filter((size) => size.label !== "Sample Kit (10ml)") ?? [];
   const [sizeLabel, setSizeLabel] = useState<string | null>(null);
@@ -48,7 +52,7 @@ export function QuickViewModal() {
       unitPrice: activeSize.price,
       accent: product.accent,
     });
-    toast.success(`${product.name} aggiunto al carrello`, { description: activeSize.label });
+    toast.success(t.product.quickView.addedToast(product.name), { description: activeSize.label });
     handleOpenChange(false);
   }
 
@@ -63,17 +67,17 @@ export function QuickViewModal() {
 
             <div className="flex flex-col p-6 sm:p-8">
               <DialogTitle className="font-sans text-[11px] normal-case tracking-luxe text-gold uppercase">
-                Anteprima Olfattiva
+                {t.product.quickView.eyebrow}
               </DialogTitle>
               <h2 className="mt-2 font-display text-2xl text-cream sm:text-3xl">{product.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{product.tagline}</p>
               <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-                {product.family} · {product.concentration}
+                {t.families[product.family]} · {t.concentrations[product.concentration]}
               </p>
 
               <div className="mt-4 space-y-1.5">
-                <ScentMeter label="Scia" value={product.sillage} compact />
-                <ScentMeter label="Durata" value={product.longevity} compact />
+                <ScentMeter label={t.product.detail.sillage} value={product.sillage} compact />
+                <ScentMeter label={t.product.detail.longevity} value={product.longevity} compact />
               </div>
 
               <div className="mt-5 space-y-1.5 border-t border-border pt-4">
@@ -86,7 +90,7 @@ export function QuickViewModal() {
               </div>
 
               <div className="mt-5">
-                <p className="mb-2 text-[11px] uppercase tracking-luxe text-gold">Formato</p>
+                <p className="mb-2 text-[11px] uppercase tracking-luxe text-gold">{t.product.quickView.formatLabel}</p>
                 <div className="flex gap-2">
                   {purchasableSizes.map((size) => (
                     <button
@@ -116,14 +120,14 @@ export function QuickViewModal() {
                   className="flex items-center justify-center gap-2 rounded-sm bg-gold py-3 text-xs uppercase tracking-luxe text-obsidian transition-opacity hover:opacity-90 cursor-pointer"
                 >
                   <ShoppingBag className="h-3.5 w-3.5" />
-                  Aggiungi al Carrello · {activeSize ? money(activeSize.price) : ""}
+                  {t.product.quickView.addToCart} · {activeSize ? money(activeSize.price) : ""}
                 </button>
                 <Link
                   href={`/product/${product.slug}`}
                   onClick={() => handleOpenChange(false)}
                   className="flex items-center justify-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:text-gold"
                 >
-                  Vedi Dettagli Completi
+                  {t.product.quickView.viewDetails}
                   <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
