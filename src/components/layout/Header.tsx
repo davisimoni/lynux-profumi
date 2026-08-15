@@ -64,20 +64,8 @@ export function Header() {
             type="button"
             onClick={openCommandPalette}
             aria-label={t.nav.searchAria}
-            className="hidden items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-gold hover:text-gold cursor-pointer sm:flex"
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span>{t.nav.search}</span>
-            <kbd className="rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground/80">
-              ⌘K
-            </kbd>
-          </button>
-
-          <button
-            type="button"
-            onClick={openCommandPalette}
-            aria-label={t.nav.searchAria}
-            className="flex h-10 w-10 items-center justify-center rounded-sm text-cream transition-colors hover:text-gold cursor-pointer sm:hidden"
+            title={t.nav.searchAria}
+            className="flex h-10 w-10 items-center justify-center rounded-sm text-cream transition-colors hover:text-gold cursor-pointer"
           >
             <Search className="h-5 w-5" />
           </button>
